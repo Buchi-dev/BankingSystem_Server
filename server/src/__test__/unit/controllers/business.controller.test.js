@@ -648,4 +648,225 @@ describe("Business Controller", () => {
       );
     });
   });
+
+  // ===========================================
+  // ORIGIN MANAGEMENT TESTS
+  // ===========================================
+  describe("Origin Management", () => {
+    const {
+      getKeyOrigins,
+      updateKeyOrigins,
+      addKeyOrigin,
+      removeKeyOrigin,
+    } = require("../../../controllers/business.controller");
+
+    const mockApiKeyWithOrigins = {
+      _id: "key123",
+      name: "Test Key",
+      user: "507f1f77bcf86cd799439011",
+      allowedOrigins: ["https://example.com", "https://*.myapp.com"],
+      environment: "production",
+      isActive: true,
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    describe("getKeyOrigins", () => {
+      test("should return allowed origins for a key", async () => {
+        mockReq.params = { keyId: "key123" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+
+        APIKey.findOne.mockResolvedValue(mockApiKeyWithOrigins);
+
+        await getKeyOrigins(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: true,
+            data: expect.objectContaining({
+              allowedOrigins: expect.arrayContaining([
+                "https://example.com",
+                "https://*.myapp.com",
+              ]),
+            }),
+          })
+        );
+      });
+
+      test("should return 404 for non-existent key", async () => {
+        mockReq.params = { keyId: "nonexistent" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+
+        APIKey.findOne.mockResolvedValue(null);
+
+        await getKeyOrigins(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(404);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            message: "API key not found",
+          })
+        );
+      });
+    });
+
+    describe("updateKeyOrigins", () => {
+      test("should update origins with valid URLs", async () => {
+        mockReq.params = { keyId: "key123" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+        mockReq.body = {
+          origins: ["https://newsite.com", "https://another.com"],
+        };
+
+        const mockKey = {
+          ...mockApiKeyWithOrigins,
+          save: jest.fn().mockResolvedValue(true),
+        };
+        APIKey.findOne.mockResolvedValue(mockKey);
+
+        await updateKeyOrigins(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockKey.allowedOrigins).toEqual([
+          "https://newsite.com",
+          "https://another.com",
+        ]);
+      });
+
+      test("should reject invalid origin URLs", async () => {
+        mockReq.params = { keyId: "key123" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+        mockReq.body = {
+          origins: ["not-a-valid-url", "ftp://invalid.com"],
+        };
+
+        const mockKey = { ...mockApiKeyWithOrigins };
+        APIKey.findOne.mockResolvedValue(mockKey);
+
+        await updateKeyOrigins(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+          })
+        );
+      });
+
+      test("should allow wildcard subdomains", async () => {
+        mockReq.params = { keyId: "key123" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+        mockReq.body = {
+          origins: ["https://*.example.com"],
+        };
+
+        const mockKey = {
+          ...mockApiKeyWithOrigins,
+          save: jest.fn().mockResolvedValue(true),
+        };
+        APIKey.findOne.mockResolvedValue(mockKey);
+
+        await updateKeyOrigins(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+      });
+    });
+
+    describe("addKeyOrigin", () => {
+      test("should add a new origin to existing list", async () => {
+        mockReq.params = { keyId: "key123" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+        mockReq.body = { origin: "https://neworigin.com" };
+
+        const mockKey = {
+          _id: "key123",
+          user: "507f1f77bcf86cd799439011",
+          allowedOrigins: ["https://existing.com"],
+          environment: "production",
+          isActive: true,
+          save: jest.fn().mockResolvedValue(true),
+        };
+        APIKey.findOne.mockResolvedValue(mockKey);
+
+        await addKeyOrigin(mockReq, mockRes, mockNext);
+
+        expect(mockKey.save).toHaveBeenCalled();
+        expect(mockRes.status).toHaveBeenCalledWith(201);
+      });
+
+      test("should not add duplicate origin", async () => {
+        mockReq.params = { keyId: "key123" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+        mockReq.body = { origin: "https://existing.com" };
+
+        const mockKey = {
+          _id: "key123",
+          user: "507f1f77bcf86cd799439011",
+          allowedOrigins: ["https://existing.com"],
+          environment: "production",
+          isActive: true,
+          save: jest.fn().mockResolvedValue(true),
+        };
+        APIKey.findOne.mockResolvedValue(mockKey);
+
+        await addKeyOrigin(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+          })
+        );
+      });
+    });
+
+    describe("removeKeyOrigin", () => {
+      test("should remove an existing origin", async () => {
+        mockReq.params = { keyId: "key123" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+        mockReq.body = { origin: "https://toremove.com" };
+
+        const mockKey = {
+          _id: "key123",
+          user: "507f1f77bcf86cd799439011",
+          allowedOrigins: ["https://toremove.com", "https://keep.com"],
+          environment: "production",
+          isActive: true,
+          save: jest.fn().mockResolvedValue(true),
+        };
+        APIKey.findOne.mockResolvedValue(mockKey);
+
+        await removeKeyOrigin(mockReq, mockRes, mockNext);
+
+        expect(mockKey.save).toHaveBeenCalled();
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+      });
+
+      test("should return error when removing non-existent origin", async () => {
+        mockReq.params = { keyId: "key123" };
+        mockReq.user = { id: "507f1f77bcf86cd799439011" };
+        mockReq.body = { origin: "https://notfound.com" };
+
+        const mockKey = {
+          _id: "key123",
+          user: "507f1f77bcf86cd799439011",
+          allowedOrigins: ["https://existing.com"],
+          environment: "production",
+          isActive: true,
+          save: jest.fn().mockResolvedValue(true),
+        };
+        APIKey.findOne.mockResolvedValue(mockKey);
+
+        await removeKeyOrigin(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(404);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+          })
+        );
+      });
+    });
+  });
 });

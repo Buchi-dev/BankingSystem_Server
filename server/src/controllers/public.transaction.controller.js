@@ -602,6 +602,86 @@ const verifyCard = async (req, res, next) => {
   }
 };
 
+/**
+ * Verify API Key and get business information
+ * GET /api/public/verify
+ * 
+ * This endpoint allows businesses to verify their API key is working
+ * and check the configuration (allowed origins, permissions, etc.)
+ * 
+ * Response:
+ * {
+ *   success: true,
+ *   message: "API Key is valid and working!",
+ *   data: {
+ *     business: { name, type, verifiedAt },
+ *     apiKey: { name, permissions, environment, allowedOrigins },
+ *     usage: { totalRequests, lastUsed }
+ *   }
+ * }
+ */
+const verifyApiKey = async (req, res, next) => {
+  try {
+    const business = req.business;
+    const apiKey = req.apiKey;
+
+    // Get the origin that made this request (for debugging CORS)
+    const requestOrigin = req.headers.origin || "No origin (server-to-server)";
+
+    res.status(200).json({
+      success: true,
+      message: "🎉 Welcome! Your API Key is valid and working!",
+      data: {
+        business: {
+          id: business._id,
+          name: business.businessInfo?.businessName || "N/A",
+          type: business.businessInfo?.businessType || "N/A",
+          owner: {
+            firstName: business.fullName?.firstName,
+            lastName: business.fullName?.lastName,
+          },
+          email: business.email,
+          websiteUrl: business.businessInfo?.websiteUrl || "Not configured",
+          isVerified: business.businessInfo?.isVerified || false,
+          verifiedAt: business.businessInfo?.verifiedAt || null,
+        },
+        apiKey: {
+          name: apiKey.name,
+          prefix: apiKey.keyPrefix,
+          environment: apiKey.environment,
+          permissions: apiKey.permissions,
+          allowedOrigins: apiKey.allowedOrigins || [],
+          ipWhitelist: apiKey.ipWhitelist?.length > 0 
+            ? `${apiKey.ipWhitelist.length} IP(s) configured` 
+            : "All IPs allowed",
+          rateLimit: {
+            requestsPerMinute: apiKey.rateLimit?.requestsPerMinute || 60,
+            requestsPerDay: apiKey.rateLimit?.requestsPerDay || 10000,
+          },
+          transactionLimits: {
+            maxPerTransaction: apiKey.transactionLimits?.maxAmountPerTransaction || 100000,
+            dailyLimit: apiKey.transactionLimits?.dailyTransactionLimit || 500000,
+          },
+          createdAt: apiKey.createdAt,
+          expiresAt: apiKey.expiresAt || "Never",
+        },
+        usage: {
+          totalRequests: apiKey.usage?.totalRequests || 0,
+          dailyRequests: apiKey.usage?.dailyRequests || 0,
+          lastUsed: apiKey.usage?.lastUsed || "Never",
+          dailyTransactionTotal: apiKey.transactionLimits?.dailyTransactionTotal || 0,
+        },
+        request: {
+          origin: requestOrigin,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   chargeCard,
   refundTransaction,
@@ -609,4 +689,5 @@ module.exports = {
   getBusinessTransactions,
   getBusinessBalance,
   verifyCard,
+  verifyApiKey,
 };

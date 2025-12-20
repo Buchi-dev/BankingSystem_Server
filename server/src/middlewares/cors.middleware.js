@@ -27,11 +27,20 @@ const matchOriginPattern = (origin, pattern) => {
   if (origin === pattern) return true;
 
   // Wildcard pattern: https://*.example.com
+  // Only allow wildcards at the subdomain level (beginning of domain)
   if (pattern.includes("*.")) {
+    // Check if wildcard is at the start of the domain part (after protocol)
+    const protocolMatch = pattern.match(/^(https?:\/\/)/);
+    if (!protocolMatch) return false;
+    
+    const afterProtocol = pattern.substring(protocolMatch[0].length);
+    // Wildcard must be at the start of the domain, not in the middle
+    if (!afterProtocol.startsWith("*.")) return false;
+    
     // Escape regex special chars except *, then convert * to subdomain regex
     const regexPattern = pattern
       .replace(/[.+?^${}()|[\]\\]/g, "\\$&") // Escape regex chars
-      .replace(/\*/g, "[a-zA-Z0-9-]+"); // * matches subdomain only (no dots)
+      .replace(/\*/g, "[a-zA-Z0-9_-]+"); // * matches subdomain with alphanumeric, underscore, or hyphen
 
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(origin);

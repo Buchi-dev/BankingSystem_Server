@@ -24,6 +24,22 @@ const { validateCardCharge, validateRefund } = require("../middlewares/validatio
 router.use(apiAuth);
 
 // ============================================
+// API KEY VERIFICATION / WELCOME ENDPOINT
+// ============================================
+
+/**
+ * GET /api/public/verify
+ * Verify API key is working and get business info
+ * No specific permission required - just valid API key
+ * 
+ * Use this endpoint to:
+ * - Test if your API key is properly configured
+ * - Verify CORS origins are working
+ * - Get business information associated with the key
+ */
+router.get("/verify", publicTransactionController.verifyApiKey);
+
+// ============================================
 // PAYMENT ENDPOINTS
 // ============================================
 
