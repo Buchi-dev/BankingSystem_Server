@@ -30,6 +30,17 @@ const chargeCard = async (req, res, next) => {
   const business = req.business;
   const apiKey = req.apiKey;
 
+  // SECURITY: Verify the business is verified before allowing transactions
+  if (!business.businessInfo?.isVerified) {
+    return res.status(403).json({
+      success: false,
+      error: {
+        code: "BUSINESS_NOT_VERIFIED",
+        message: "Business must be verified before processing transactions.",
+      },
+    });
+  }
+
   const session = await mongoose.startSession();
   session.startTransaction();
 

@@ -17,7 +17,7 @@ const transactionRoutes = require("./routes/transaction.route");
 const publicTransactionRoutes = require("./routes/public.transaction.route");
 const businessRoutes = require("./routes/business.route");
 
-const { logger, limiter, speedLimiter, errorHandler, mongoSanitize } = require("./middlewares");
+const { logger, limiter, speedLimiter, errorHandler, mongoSanitize, sanitize } = require("./middlewares");
 
 const app = express();
 
@@ -30,6 +30,7 @@ app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json({ limit: "10mb" })); // Parse JSON bodies with size limit
 app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Parse URL-encoded bodies
+app.use(sanitize); // SECURITY: Sanitize all inputs to prevent XSS attacks
 app.use(logger); // Log every request
 
 // 3. Rate Limiting & Speed Control

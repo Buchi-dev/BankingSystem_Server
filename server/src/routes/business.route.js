@@ -2,13 +2,25 @@
  * BUSINESS ROUTES
  * ===============
  * Routes for business account management and API key operations
+ * 
+ * SECURITY: All business-specific endpoints require:
+ * 1. Authentication (auth middleware)
+ * 2. Business account type (requireBusiness middleware)
+ * 
+ * This prevents personal/customer accounts from accessing business APIs.
  */
 
 const express = require("express");
 const router = express.Router();
 const businessController = require("../controllers/business.controller");
 
-const { auth, checkRole, validateBusinessRegistration } = require("../middlewares");
+const { 
+  auth, 
+  checkRole, 
+  validateBusinessRegistration,
+  requireBusiness,
+  requireVerifiedBusiness,
+} = require("../middlewares");
 
 // ============================================
 // PUBLIC ROUTES (No authentication required)
@@ -21,32 +33,36 @@ const { auth, checkRole, validateBusinessRegistration } = require("../middleware
 router.post("/register", validateBusinessRegistration, businessController.registerBusiness);
 
 // ============================================
-// PROTECTED ROUTES (Authentication required)
+// PROTECTED ROUTES (Business accounts only)
 // ============================================
 
 /**
  * GET /api/business/profile
  * Get business profile
+ * SECURITY: Only business account types can access
  */
-router.get("/profile", auth, businessController.getBusinessProfile);
+router.get("/profile", auth, requireBusiness, businessController.getBusinessProfile);
 
 /**
  * POST /api/business/api-keys
  * Generate a new API key
+ * SECURITY: Requires verified business account
  */
-router.post("/api-keys", auth, businessController.generateAPIKey);
+router.post("/api-keys", auth, requireVerifiedBusiness, businessController.generateAPIKey);
 
 /**
  * GET /api/business/api-keys
  * List all API keys for the business
+ * SECURITY: Only business account types can access
  */
-router.get("/api-keys", auth, businessController.listAPIKeys);
+router.get("/api-keys", auth, requireBusiness, businessController.listAPIKeys);
 
 /**
  * DELETE /api/business/api-keys/:keyId
  * Revoke an API key
+ * SECURITY: Only business account types can access
  */
-router.delete("/api-keys/:keyId", auth, businessController.revokeAPIKey);
+router.delete("/api-keys/:keyId", auth, requireBusiness, businessController.revokeAPIKey);
 
 // ============================================
 // ADMIN ROUTES (Admin authentication required)

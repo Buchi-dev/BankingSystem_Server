@@ -14,6 +14,8 @@ const {
   validateBusinessRegistration,
 } = require('./validation.middleware');
 const mongoSanitize = require('./mongoSanitize.middleware');
+const sanitize = require('./sanitize.middleware');
+const { requireBusiness, requireVerifiedBusiness } = require('./business.middleware');
 const { apiAuth, requirePermission, checkTransactionLimit } = require('./apiAuth.middleware');
 
 module.exports = {
@@ -35,4 +37,7 @@ module.exports = {
   apiAuth,
   requirePermission,
   checkTransactionLimit,
+  sanitize,
+  requireBusiness,
+  requireVerifiedBusiness,
 };

@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+
+// Use native crypto.randomUUID (Node.js 14.17+) for generating UUIDs
+const generateUUID = () => crypto.randomUUID();
 
 const TransactionSchema = new mongoose.Schema({
   user: {
@@ -132,7 +135,7 @@ const TransactionSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    default: () => uuidv4(),
+    default: () => generateUUID(),
   },
 }, { timestamps: true });
 

@@ -55,6 +55,7 @@ describe("Public Transaction Controller - Unit Tests", () => {
         _id: "business123",
         businessInfo: {
           businessName: "Test Business",
+          isVerified: true, // Business must be verified to process transactions
         },
       },
       apiKey: {
@@ -82,6 +83,28 @@ describe("Public Transaction Controller - Unit Tests", () => {
         amount: 100,
         description: "Test purchase",
       };
+    });
+
+    test("should return 403 if business is not verified", async () => {
+      // Override business to be unverified
+      req.business = {
+        _id: "business123",
+        businessInfo: {
+          businessName: "Unverified Business",
+          isVerified: false,
+        },
+      };
+
+      await chargeCard(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: {
+          code: "BUSINESS_NOT_VERIFIED",
+          message: "Business must be verified before processing transactions.",
+        },
+      });
     });
 
     test("should return 404 if card not found", async () => {

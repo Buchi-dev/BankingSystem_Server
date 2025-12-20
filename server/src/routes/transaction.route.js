@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const transactionController = require("../controllers/transaction.controller");
 
-const { auth, validateTransaction, validateDeposit, validateWithdraw } = require("../middlewares");
+const { auth, checkRole, validateTransaction, validateDeposit, validateWithdraw } = require("../middlewares");
 
 // ============================================
 // PROTECTED ROUTES (Authentication required)
@@ -19,5 +19,12 @@ router.post("/deposit", auth, validateDeposit, transactionController.depositFund
 
 // Withdraw funds from user wallet to bank
 router.post("/withdraw", auth, validateWithdraw, transactionController.withdrawFunds);
+
+// ============================================
+// ADMIN ROUTES (Admin authentication required)
+// ============================================
+
+// Get bank status (balance, statistics)
+router.get("/bank/status", auth, checkRole("admin"), transactionController.getBankStatus);
 
 module.exports = router;

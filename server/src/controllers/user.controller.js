@@ -9,11 +9,11 @@ const { formatCardNumber, maskCardNumber } = require("../utils/cardGenerator");
 // Register new user
 const register = async (req, res, next) => {
   try {
+    // SECURITY: Only whitelist allowed fields - role is NOT accepted from user input
     const {
       fullName = {},
       email,
       password,
-      role,
     } = req.body;
 
     const { firstName, lastName, middleInitial } = fullName;
@@ -29,11 +29,12 @@ const register = async (req, res, next) => {
 
     // Create new user (password will be hashed automatically by model middleware)
     // Virtual card is auto-generated for personal accounts
+    // SECURITY: Role is always 'user' for new registrations - admin roles must be assigned manually
     const user = await User.create({
       fullName: { firstName, lastName, middleInitial },
       email,
       password,
-      role: role || "user", // Default to user if not specified
+      role: "user", // SECURITY: Hardcoded - prevents mass assignment attack
       accountType: "personal", // Personal account gets virtual card
     });
 

@@ -17,6 +17,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
@@ -27,6 +28,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.0.1",
     "nodemon": "^3.1.11",
+    "sanitize-html": "^2.17.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
@@ -47,6 +49,12 @@
       "!src/server.js",
       "!src/**/*.test.js",
       "!src/**/*.spec.js"
-    ]
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(uuid)/)"
+    ],
+    "moduleNameMapper": {
+      "^uuid$": "uuid"
+    }
   }
 }

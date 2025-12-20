@@ -110,9 +110,9 @@ const depositFunds = async (req, res, next) => {
   session.startTransaction();
 
   try {
-    // Fetch user and bank with session
+    // Fetch user and bank with session (bank auto-initializes if not exists)
     const user = await User.findById(userId).session(session);
-    const bank = await Bank.findOne().session(session);
+    const bank = await Bank.getOrCreateBank(session);
 
     if (!user) {
       await session.abortTransaction();
@@ -120,15 +120,6 @@ const depositFunds = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: "User not found",
-      });
-    }
-
-    if (!bank) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({
-        success: false,
-        message: "Bank not found",
       });
     }
 
@@ -193,9 +184,9 @@ const withdrawFunds = async (req, res, next) => {
   session.startTransaction();
 
   try {
-    // Fetch user and bank with session
+    // Fetch user and bank with session (bank auto-initializes if not exists)
     const user = await User.findById(userId).session(session);
-    const bank = await Bank.findOne().session(session);
+    const bank = await Bank.getOrCreateBank(session);
 
     if (!user) {
       await session.abortTransaction();
@@ -203,15 +194,6 @@ const withdrawFunds = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: "User not found",
-      });
-    }
-
-    if (!bank) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({
-        success: false,
-        message: "Bank not found",
       });
     }
 
@@ -268,9 +250,38 @@ const withdrawFunds = async (req, res, next) => {
   }
 }
 
+/**
+ * Get bank status (Admin only)
+ * Returns current bank balance and statistics
+ */
+const getBankStatus = async (req, res, next) => {
+  try {
+    const bank = await Bank.getOrCreateBank();
+    
+    const balance = parseFloat(bank.bankBalance.toString());
+    const totalDeposits = parseFloat(bank.totalDeposits.toString());
+    const totalWithdrawals = parseFloat(bank.totalWithdrawals.toString());
+
+    res.status(200).json({
+      success: true,
+      data: {
+        bankBalance: balance,
+        formattedBalance: `PHP ${balance.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+        totalDeposits,
+        totalWithdrawals,
+        lastUpdated: bank.lastUpdated,
+        createdAt: bank.createdAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUserTransactions,
   transferFunds,
   depositFunds,
   withdrawFunds,
+  getBankStatus,
 };
