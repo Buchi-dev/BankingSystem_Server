@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City Banking API - Developer Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-university"></i>
+                    <span>Smart City Banking API</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="#overview" class="nav-link">Overview</a>
+                    <a href="#quickstart" class="nav-link">Quick Start</a>
+                    <a href="#authentication" class="nav-link">Authentication</a>
+                    <a href="#endpoints" class="nav-link">API Endpoints</a>
+                    <a href="#examples" class="nav-link">Examples</a>
+                    <a href="https://github.com/yourusername/banking-system" class="nav-link" target="_blank">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Smart City Banking Public API</h1>
+                <p class="hero-subtitle">Integrate secure payment processing into your application with our enterprise-grade banking API</p>
+                <div class="hero-buttons">
+                    <a href="#quickstart" class="btn btn-primary">Get Started</a>
+                    <a href="#examples" class="btn btn-secondary">View Examples</a>
+                </div>
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <i class="fas fa-lock"></i>
+                        <span>Secure</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <span>Fast</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-code"></i>
+                        <span>Simple</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Reliable</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="content-wrapper">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="sidebar-section">
+                        <h3>Getting Started</h3>
+                        <ul>
+                            <li><a href="#overview">Overview</a></li>
+                            <li><a href="#quickstart">Quick Start</a></li>
+                            <li><a href="#authentication">Authentication</a></li>
+                        </ul>
+                    </div>
+                    <div class="sidebar-section">
+                        <h3>API Reference</h3>
+                        <ul>
+                            <li><a href="#verify">Verify API Key</a></li>
+                            <li><a href="#charge">Charge Card</a></li>
+                            <li><a href="#refund">Process Refund</a></li>
+                            <li><a href="#transactions">Get Transactions</a></li>
+                            <li><a href="#verify-card">Verify Card</a></li>
+                            <li><a href="#balance">Check Balance</a></li>
+                        </ul>
+                    </div>
+                    <div class="sidebar-section">
+                        <h3>Advanced</h3>
+                        <ul>
+                            <li><a href="#errors">Error Handling</a></li>
+                            <li><a href="#rate-limits">Rate Limits</a></li>
+                            <li><a href="#webhooks">Webhooks</a></li>
+                            <li><a href="#testing">Testing</a></li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- Content Area -->
+                <div class="content">
+                    <!-- Overview Section -->
+                    <section id="overview" class="doc-section">
+                        <h2>Overview</h2>
+                        <p class="lead">The Smart City Banking Public API allows external merchants and vendors to integrate secure payment processing into their applications. Process customer payments, issue refunds, and manage transactions programmatically.</p>
+                        
+                        <div class="info-boxes">
+                            <div class="info-box info-box-blue">
+                                <i class="fas fa-info-circle"></i>
+                                <div>
+                                    <strong>Base URL</strong>
+                                    <code>https://api.smartcitybanking.com/api/public</code>
+                                </div>
+                            </div>
+                            <div class="info-box info-box-green">
+                                <i class="fas fa-check-circle"></i>
+                                <div>
+                                    <strong>API Version</strong>
+                                    <span>v2.0.0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Key Features</h3>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <i class="fas fa-credit-card"></i>
+                                <h4>Payment Processing</h4>
+                                <p>Charge customer cards securely with real-time transaction processing</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-undo"></i>
+                                <h4>Refund Management</h4>
+                                <p>Issue full or partial refunds with complete audit trails</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-shield-alt"></i>
+                                <h4>Enterprise Security</h4>
+                                <p>API key authentication with rate limiting and CORS protection</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-chart-line"></i>
+                                <h4>Transaction History</h4>
+                                <p>Complete transaction logs and analytics for your business</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Quick Start Section -->
+                    <section id="quickstart" class="doc-section">
+                        <h2>Quick Start</h2>
+                        <p>Get up and running with the Smart City Banking API in just a few steps.</p>
+
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h3>Register a Business Account</h3>
+                                    <p>Create a business account through our platform. You'll need a valid @smu.edu.ph email address.</p>
+                                    <pre><code class="language-bash">POST /api/business/register</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h3>Get Admin Verification</h3>
+                                    <p>Wait for admin approval. Once verified, you can generate API keys.</p>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-clock"></i>
+                                        Verification typically takes 24-48 hours
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h3>Generate API Key</h3>
+                                    <p>Create an API key with the required permissions from your dashboard.</p>
+                                    <pre><code class="language-bash">POST /api/business/api-keys</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h3>Make Your First API Call</h3>
+                                    <p>Test your integration with a simple verification request.</p>
+                                    <div class="code-tabs">
+                                        <div class="tab-buttons">
+                                            <button class="tab-button active" data-tab="curl-verify">cURL</button>
+                                            <button class="tab-button" data-tab="node-verify">Node.js</button>
+                                            <button class="tab-button" data-tab="python-verify">Python</button>
+                                        </div>
+                                        <div class="tab-content active" id="curl-verify">
+<pre><code class="language-bash">curl https://api.smartcitybanking.com/api/public/verify \
+  -H "X-API-Key: scb_live_your_api_key_here"</code></pre>
+                                        </div>
+                                        <div class="tab-content" id="node-verify">
+<pre><code class="language-javascript">const axios = require('axios');
+
+const response = await axios.get(
+  'https://api.smartcitybanking.com/api/public/verify',
+  {
+    headers: {
+      'X-API-Key': 'scb_live_your_api_key_here'
+    }
+  }
+);
+
+console.log(response.data);</code></pre>
+                                        </div>
+                                        <div class="tab-content" id="python-verify">
+<pre><code class="language-python">import requests
+
+response = requests.get(
+    'https://api.smartcitybanking.com/api/public/verify',
+    headers={'X-API-Key': 'scb_live_your_api_key_here'}
+)
+
+print(response.json())</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Authentication Section -->
+                    <section id="authentication" class="doc-section">
+                        <h2>Authentication</h2>
+                        <p>All API requests must include your API key in the request header.</p>
+
+                        <h3>API Key Format</h3>
+                        <p>API keys follow this format:</p>
+                        <pre><code class="language-text">scb_live_&lt;64_character_random_string&gt;</code></pre>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Keep Your API Key Secret!</strong> Never expose your API key in client-side code or public repositories.
+                        </div>
+
+                        <h3>Making Authenticated Requests</h3>
+                        <p>Include your API key in the <code>X-API-Key</code> header:</p>
+                        <pre><code class="language-bash">X-API-Key: scb_live_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz</code></pre>
+
+                        <h3>Permissions</h3>
+                        <p>Each API key can have different permissions:</p>
+                        <div class="permissions-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Permission</th>
+                                        <th>Description</th>
+                                        <th>Endpoints</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>charge</code></td>
+                                        <td>Process customer payments</td>
+                                        <td>POST /transactions/charge<br>POST /cards/verify</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>refund</code></td>
+                                        <td>Issue refunds</td>
+                                        <td>POST /transactions/refund</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>transactions</code></td>
+                                        <td>View transaction history</td>
+                                        <td>GET /transactions<br>GET /transactions/:id</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>balance</code></td>
+                                        <td>Check business balance</td>
+                                        <td>GET /balance</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- API Endpoints Section -->
+                    <section id="endpoints" class="doc-section">
+                        <h2>API Endpoints</h2>
+
+                        <!-- Verify API Key -->
+                        <div id="verify" class="endpoint">
+                            <div class="endpoint-header">
+                                <span class="http-method method-get">GET</span>
+                                <span class="endpoint-path">/api/public/verify</span>
+                            </div>
+                            <p>Verify your API key is valid and properly configured.</p>
+                            
+                            <h4>Request Headers</h4>
+                            <pre><code class="language-text">X-API-Key: scb_live_your_api_key_here</code></pre>
+
+                            <h4>Response (200 OK)</h4>
+                            <pre><code class="language-json">{
+  "success": true,
+  "message": "API key is valid",
+  "data": {
+    "business": {
+      "_id": "674a8f9c8e1234567890xyz1",
+      "businessName": "Pedro's Food Stall",
+      "businessType": "food",
+      "isVerified": true
+    },
+    "apiKey": {
+      "name": "Production Website Key",
+      "permissions": ["charge", "refund", "transactions"],
+      "rateLimit": {
+        "requestsPerMinute": 60,
+        "requestsPerDay": 10000
+      }
+    }
+  }
+}</code></pre>
+                        </div>
+
+                        <!-- Charge Card -->
+                        <div id="charge" class="endpoint">
+                            <div class="endpoint-header">
+                                <span class="http-method method-post">POST</span>
+                                <span class="endpoint-path">/api/public/transactions/charge</span>
+                                <span class="permission-badge">Requires: charge</span>
+                            </div>
+                            <p>Charge a customer's virtual card for a transaction.</p>
+
+                            <h4>Request Headers</h4>
+                            <pre><code class="language-text">X-API-Key: scb_live_your_api_key_here
+Content-Type: application/json</code></pre>
+
+                            <h4>Request Body</h4>
+                            <pre><code class="language-json">{
+  "cardNumber": "4532123456789012",
+  "cvv": "123",
+  "amount": 150.50,
+  "description": "Coffee and Pastry - Order #1234",
+  "externalReference": "ORDER-2025-1234"
+}</code></pre>
+
+                            <h4>Parameters</h4>
+                            <div class="params-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Required</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>cardNumber</td>
+                                            <td>string</td>
+                                            <td>Yes</td>
+                                            <td>16-digit card number</td>
+                                        </tr>
+                                        <tr>
+                                            <td>cvv</td>
+                                            <td>string</td>
+                                            <td>Yes</td>
+                                            <td>3-digit CVV code</td>
+                                        </tr>
+                                        <tr>
+                                            <td>amount</td>
+                                            <td>number</td>
+                                            <td>Yes</td>
+                                            <td>Amount to charge (min: 1)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>description</td>
+                                            <td>string</td>
+                                            <td>No</td>
+                                            <td>Transaction description (max 200 chars)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>externalReference</td>
+                                            <td>string</td>
+                                            <td>No</td>
+                                            <td>Your order/invoice ID (max 100 chars)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4>Response (200 OK)</h4>
+                            <pre><code class="language-json">{
+  "success": true,
+  "message": "Payment processed successfully",
+  "data": {
+    "transaction": {
+      "_id": "674a9012345678901234tx01",
+      "reference": "TXN-2025-1234567890",
+      "type": "payment",
+      "amount": 150.50,
+      "status": "completed",
+      "description": "Coffee and Pastry - Order #1234",
+      "externalReference": "ORDER-2025-1234",
+      "customer": {
+        "cardLast4": "9012"
+      },
+      "merchant": {
+        "businessName": "Pedro's Food Stall"
+      },
+      "createdAt": "2025-12-20T12:30:00.000Z"
+    }
+  }
+}</code></pre>
+
+                            <h4>Code Examples</h4>
+                            <div class="code-tabs">
+                                <div class="tab-buttons">
+                                    <button class="tab-button active" data-tab="node-charge">Node.js</button>
+                                    <button class="tab-button" data-tab="python-charge">Python</button>
+                                    <button class="tab-button" data-tab="curl-charge">cURL</button>
+                                </div>
+                                <div class="tab-content active" id="node-charge">
+<pre><code class="language-javascript">const axios = require('axios');
+
+async function chargeCard() {
+  try {
+    const response = await axios.post(
+      'https://api.smartcitybanking.com/api/public/transactions/charge',
+      {
+        cardNumber: '4532123456789012',
+        cvv: '123',
+        amount: 150.50,
+        description: 'Coffee and Pastry - Order #1234',
+        externalReference: 'ORDER-2025-1234'
+      },
+      {
+        headers: {
+          'X-API-Key': process.env.SCB_API_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log('Payment successful:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Payment failed:', error.response.data);
+    throw error;
+  }
+}
+
+chargeCard();</code></pre>
+                                </div>
+                                <div class="tab-content" id="python-charge">
+<pre><code class="language-python">import requests
+import os
+
+def charge_card():
+    url = 'https://api.smartcitybanking.com/api/public/transactions/charge'
+    
+    payload = {
+        'cardNumber': '4532123456789012',
+        'cvv': '123',
+        'amount': 150.50,
+        'description': 'Coffee and Pastry - Order #1234',
+        'externalReference': 'ORDER-2025-1234'
+    }
+    
+    headers = {
+        'X-API-Key': os.environ['SCB_API_KEY'],
+        'Content-Type': 'application/json'
+    }
+    
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code == 200:
+        print('Payment successful:', response.json())
+        return response.json()
+    else:
+        print('Payment failed:', response.json())
+        raise Exception(response.json())
+
+charge_card()</code></pre>
+                                </div>
+                                <div class="tab-content" id="curl-charge">
+<pre><code class="language-bash">curl -X POST https://api.smartcitybanking.com/api/public/transactions/charge \
+  -H "X-API-Key: scb_live_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cardNumber": "4532123456789012",
+    "cvv": "123",
+    "amount": 150.50,
+    "description": "Coffee and Pastry - Order #1234",
+    "externalReference": "ORDER-2025-1234"
+  }'</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Refund Transaction -->
+                        <div id="refund" class="endpoint">
+                            <div class="endpoint-header">
+                                <span class="http-method method-post">POST</span>
+                                <span class="endpoint-path">/api/public/transactions/refund</span>
+                                <span class="permission-badge">Requires: refund</span>
+                            </div>
+                            <p>Process a refund for a previous transaction.</p>
+
+                            <h4>Request Body</h4>
+                            <pre><code class="language-json">{
+  "transactionId": "674a9012345678901234tx01",
+  "amount": 150.50,
+  "reason": "Customer requested refund"
+}</code></pre>
+
+                            <h4>Response (200 OK)</h4>
+                            <pre><code class="language-json">{
+  "success": true,
+  "message": "Refund processed successfully",
+  "data": {
+    "refund": {
+      "_id": "674a9012345678901234rf01",
+      "reference": "REF-2025-9876543210",
+      "type": "refund",
+      "amount": 150.50,
+      "status": "completed",
+      "reason": "Customer requested refund",
+      "originalTransaction": "674a9012345678901234tx01",
+      "createdAt": "2025-12-20T14:00:00.000Z"
+    }
+  }
+}</code></pre>
+                        </div>
+
+                        <!-- Get Transactions -->
+                        <div id="transactions" class="endpoint">
+                            <div class="endpoint-header">
+                                <span class="http-method method-get">GET</span>
+                                <span class="endpoint-path">/api/public/transactions</span>
+                                <span class="permission-badge">Requires: transactions</span>
+                            </div>
+                            <p>Retrieve your business transaction history.</p>
+
+                            <h4>Query Parameters</h4>
+                            <div class="params-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Default</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>limit</td>
+                                            <td>number</td>
+                                            <td>50</td>
+                                            <td>Number of results (max: 100)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>page</td>
+                                            <td>number</td>
+                                            <td>1</td>
+                                            <td>Page number</td>
+                                        </tr>
+                                        <tr>
+                                            <td>status</td>
+                                            <td>string</td>
+                                            <td>-</td>
+                                            <td>Filter by status (completed, failed, refunded)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4>Example Request</h4>
+                            <pre><code class="language-bash">GET /api/public/transactions?limit=20&page=1&status=completed</code></pre>
+                        </div>
+
+                        <!-- Verify Card -->
+                        <div id="verify-card" class="endpoint">
+                            <div class="endpoint-header">
+                                <span class="http-method method-post">POST</span>
+                                <span class="endpoint-path">/api/public/cards/verify</span>
+                                <span class="permission-badge">Requires: charge</span>
+                            </div>
+                            <p>Verify a card is valid without charging it.</p>
+
+                            <h4>Request Body</h4>
+                            <pre><code class="language-json">{
+  "cardNumber": "4532123456789012",
+  "cvv": "123"
+}</code></pre>
+
+                            <h4>Response (200 OK)</h4>
+                            <pre><code class="language-json">{
+  "success": true,
+  "message": "Card is valid",
+  "data": {
+    "cardLast4": "9012",
+    "cardType": "SmartCity",
+    "isActive": true,
+    "expiryDate": "2028-12-20T00:00:00.000Z",
+    "dailyLimitRemaining": 47500
+  }
+}</code></pre>
+                        </div>
+
+                        <!-- Check Balance -->
+                        <div id="balance" class="endpoint">
+                            <div class="endpoint-header">
+                                <span class="http-method method-get">GET</span>
+                                <span class="endpoint-path">/api/public/balance</span>
+                                <span class="permission-badge">Requires: balance</span>
+                            </div>
+                            <p>Check your business wallet balance.</p>
+
+                            <h4>Response (200 OK)</h4>
+                            <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "balance": "25430.50",
+    "currency": "PHP",
+    "lastTransaction": {
+      "amount": 150.50,
+      "type": "payment",
+      "timestamp": "2025-12-20T12:30:00.000Z"
+    }
+  }
+}</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Examples Section -->
+                    <section id="examples" class="doc-section">
+                        <h2>Complete Integration Examples</h2>
+
+                        <h3>Node.js SDK Example</h3>
+                        <p>Here's a complete example of a payment processing class:</p>
+                        <pre><code class="language-javascript">// SmartCityBanking.js
+const axios = require('axios');
+
+class SmartCityBankingClient {
+  constructor(apiKey, baseURL = 'https://api.smartcitybanking.com/api/public') {
+    this.apiKey = apiKey;
+    this.baseURL = baseURL;
+    this.axios = axios.create({
+      baseURL: this.baseURL,
+      headers: {
+        'X-API-Key': this.apiKey,
+        'Content-Type': 'application/json'
+      }
+    });
+  }
+
+  async verifyApiKey() {
+    const response = await this.axios.get('/verify');
+    return response.data;
+  }
+
+  async chargeCard({ cardNumber, cvv, amount, description, externalReference }) {
+    try {
+      const response = await this.axios.post('/transactions/charge', {
+        cardNumber,
+        cvv,
+        amount,
+        description,
+        externalReference
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error?.message || 'Payment failed');
+    }
+  }
+
+  async refund(transactionId, amount, reason) {
+    const response = await this.axios.post('/transactions/refund', {
+      transactionId,
+      amount,
+      reason
+    });
+    return response.data;
+  }
+
+  async getTransactions(options = {}) {
+    const { limit = 50, page = 1, status } = options;
+    const params = { limit, page };
+    if (status) params.status = status;
+    
+    const response = await this.axios.get('/transactions', { params });
+    return response.data;
+  }
+
+  async verifyCard(cardNumber, cvv) {
+    const response = await this.axios.post('/cards/verify', {
+      cardNumber,
+      cvv
+    });
+    return response.data;
+  }
+
+  async getBalance() {
+    const response = await this.axios.get('/balance');
+    return response.data;
+  }
+}
+
+// Usage Example
+const client = new SmartCityBankingClient(process.env.SCB_API_KEY);
+
+async function processOrder(order) {
+  try {
+    // Verify card first
+    await client.verifyCard(order.cardNumber, order.cvv);
+    
+    // Process payment
+    const payment = await client.chargeCard({
+      cardNumber: order.cardNumber,
+      cvv: order.cvv,
+      amount: order.total,
+      description: `Order #${order.id}`,
+      externalReference: order.id
+    });
+    
+    console.log('Payment successful:', payment.data.transaction.reference);
+    return payment;
+  } catch (error) {
+    console.error('Payment failed:', error.message);
+    throw error;
+  }
+}
+
+module.exports = SmartCityBankingClient;</code></pre>
+
+                        <h3>Express.js Integration</h3>
+                        <p>Complete Express.js checkout endpoint example:</p>
+                        <pre><code class="language-javascript">// routes/checkout.js
+const express = require('express');
+const SmartCityBankingClient = require('../lib/SmartCityBanking');
+
+const router = express.Router();
+const banking = new SmartCityBankingClient(process.env.SCB_API_KEY);
+
+// Checkout endpoint
+router.post('/checkout', async (req, res) => {
+  const { cartItems, cardNumber, cvv, customerInfo } = req.body;
+  
+  try {
+    // Calculate total
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    
+    // Verify card
+    const verification = await banking.verifyCard(cardNumber, cvv);
+    
+    if (verification.data.dailyLimitRemaining < total) {
+      return res.status(400).json({
+        success: false,
+        error: 'Insufficient daily limit remaining'
+      });
+    }
+    
+    // Process payment
+    const payment = await banking.chargeCard({
+      cardNumber,
+      cvv,
+      amount: total,
+      description: `Purchase of ${cartItems.length} items`,
+      externalReference: `ORDER-${Date.now()}`
+    });
+    
+    // Save order to database
+    const order = await saveOrderToDatabase({
+      customerInfo,
+      items: cartItems,
+      total,
+      paymentReference: payment.data.transaction.reference,
+      status: 'paid'
+    });
+    
+    res.json({
+      success: true,
+      order,
+      payment: payment.data.transaction
+    });
+    
+  } catch (error) {
+    console.error('Checkout error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Refund endpoint
+router.post('/refund/:orderId', async (req, res) => {
+  const { orderId } = req.params;
+  const { reason } = req.body;
+  
+  try {
+    // Get order from database
+    const order = await getOrderFromDatabase(orderId);
+    
+    if (order.status === 'refunded') {
+      return res.status(400).json({
+        success: false,
+        error: 'Order already refunded'
+      });
+    }
+    
+    // Process refund
+    const refund = await banking.refund(
+      order.paymentTransactionId,
+      order.total,
+      reason || 'Customer requested refund'
+    );
+    
+    // Update order status
+    await updateOrderStatus(orderId, 'refunded');
+    
+    res.json({
+      success: true,
+      refund: refund.data.refund
+    });
+    
+  } catch (error) {
+    console.error('Refund error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+module.exports = router;</code></pre>
+                    </section>
+
+                    <!-- Error Handling Section -->
+                    <section id="errors" class="doc-section">
+                        <h2>Error Handling</h2>
+                        <p>All errors follow a consistent format:</p>
+
+                        <pre><code class="language-json">{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message"
+  }
+}</code></pre>
+
+                        <h3>Common Error Codes</h3>
+                        <div class="error-codes">
+                            <div class="error-code">
+                                <span class="error-status">401</span>
+                                <div class="error-details">
+                                    <strong>MISSING_API_KEY</strong>
+                                    <p>No API key provided in X-API-Key header</p>
+                                </div>
+                            </div>
+                            <div class="error-code">
+                                <span class="error-status">401</span>
+                                <div class="error-details">
+                                    <strong>INVALID_API_KEY</strong>
+                                    <p>API key is invalid or expired</p>
+                                </div>
+                            </div>
+                            <div class="error-code">
+                                <span class="error-status">403</span>
+                                <div class="error-details">
+                                    <strong>PERMISSION_DENIED</strong>
+                                    <p>API key lacks required permission</p>
+                                </div>
+                            </div>
+                            <div class="error-code">
+                                <span class="error-status">400</span>
+                                <div class="error-details">
+                                    <strong>INVALID_CARD_NUMBER</strong>
+                                    <p>Card number format is invalid</p>
+                                </div>
+                            </div>
+                            <div class="error-code">
+                                <span class="error-status">400</span>
+                                <div class="error-details">
+                                    <strong>INSUFFICIENT_FUNDS</strong>
+                                    <p>Customer has insufficient balance</p>
+                                </div>
+                            </div>
+                            <div class="error-code">
+                                <span class="error-status">429</span>
+                                <div class="error-details">
+                                    <strong>RATE_LIMIT_EXCEEDED</strong>
+                                    <p>Too many requests, please retry</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Error Handling Best Practices</h3>
+                        <pre><code class="language-javascript">async function handlePayment(paymentData) {
+  try {
+    const result = await banking.chargeCard(paymentData);
+    return result;
+  } catch (error) {
+    // Check if it's an API error
+    if (error.response?.data?.error) {
+      const { code, message } = error.response.data.error;
+      
+      switch (code) {
+        case 'INSUFFICIENT_FUNDS':
+          return { error: 'Customer has insufficient balance' };
+        case 'INVALID_CVV':
+          return { error: 'Invalid CVV provided' };
+        case 'CARD_EXPIRED':
+          return { error: 'Card has expired' };
+        case 'DAILY_LIMIT_EXCEEDED':
+          return { error: 'Transaction exceeds daily limit' };
+        case 'RATE_LIMIT_EXCEEDED':
+          // Implement retry with exponential backoff
+          await sleep(2000);
+          return handlePayment(paymentData);
+        default:
+          return { error: message };
+      }
+    }
+    
+    // Network or other error
+    throw error;
+  }
+}</code></pre>
+                    </section>
+
+                    <!-- Rate Limits Section -->
+                    <section id="rate-limits" class="doc-section">
+                        <h2>Rate Limits</h2>
+                        <p>API keys have configurable rate limits to ensure fair usage.</p>
+
+                        <h3>Default Limits</h3>
+                        <div class="limits-grid">
+                            <div class="limit-card">
+                                <i class="fas fa-clock"></i>
+                                <h4>Per Minute</h4>
+                                <p class="limit-value">60 requests</p>
+                            </div>
+                            <div class="limit-card">
+                                <i class="fas fa-calendar-day"></i>
+                                <h4>Per Day</h4>
+                                <p class="limit-value">10,000 requests</p>
+                            </div>
+                            <div class="limit-card">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <h4>Per Transaction</h4>
+                                <p class="limit-value">₱100,000</p>
+                            </div>
+                            <div class="limit-card">
+                                <i class="fas fa-coins"></i>
+                                <h4>Daily Total</h4>
+                                <p class="limit-value">₱500,000</p>
+                            </div>
+                        </div>
+
+                        <h3>Rate Limit Headers</h3>
+                        <p>Each response includes rate limit information:</p>
+                        <pre><code class="language-text">X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1640000000</code></pre>
+
+                        <h3>Handling Rate Limits</h3>
+                        <pre><code class="language-javascript">async function makeRequestWithRetry(requestFn, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      if (error.response?.status === 429) {
+        // Rate limited, wait and retry
+        const retryAfter = error.response.headers['retry-after'] || Math.pow(2, i);
+        console.log(`Rate limited, retrying after ${retryAfter}s`);
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+      } else {
+        throw error;
+      }
+    }
+  }
+  throw new Error('Max retries exceeded');
+}</code></pre>
+                    </section>
+
+                    <!-- Webhooks Section -->
+                    <section id="webhooks" class="doc-section">
+                        <h2>Webhooks</h2>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Coming Soon!</strong> Webhook support is planned for future releases.
+                        </div>
+                        <p>Webhooks will allow you to receive real-time notifications for events like:</p>
+                        <ul>
+                            <li>Transaction confirmations</li>
+                            <li>Refund notifications</li>
+                            <li>Failed transaction alerts</li>
+                            <li>Balance updates</li>
+                        </ul>
+                    </section>
+
+                    <!-- Testing Section -->
+                    <section id="testing" class="doc-section">
+                        <h2>Testing</h2>
+                        <p>Use test mode to safely develop your integration without real money.</p>
+
+                        <h3>Test vs Live Mode</h3>
+                        <div class="modes-comparison">
+                            <div class="mode-card">
+                                <h4><i class="fas fa-flask"></i> Test Mode</h4>
+                                <ul>
+                                    <li>API keys start with <code>scb_test_</code></li>
+                                    <li>Separate test database</li>
+                                    <li>No real money involved</li>
+                                    <li>Higher rate limits</li>
+                                    <li>Auto-resets daily</li>
+                                </ul>
+                            </div>
+                            <div class="mode-card">
+                                <h4><i class="fas fa-rocket"></i> Live Mode</h4>
+                                <ul>
+                                    <li>API keys start with <code>scb_live_</code></li>
+                                    <li>Production database</li>
+                                    <li>Real transactions</li>
+                                    <li>Standard rate limits</li>
+                                    <li>Permanent records</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <h3>Test Card Numbers</h3>
+                        <div class="test-cards">
+                            <div class="test-card-item">
+                                <strong>Success</strong>
+                                <code>4532 1234 5678 9012</code>
+                                <span>CVV: 123, PIN: 1234</span>
+                            </div>
+                            <div class="test-card-item">
+                                <strong>Insufficient Funds</strong>
+                                <code>4532 0000 0000 0001</code>
+                                <span>CVV: 100, PIN: 0000</span>
+                            </div>
+                            <div class="test-card-item">
+                                <strong>Expired Card</strong>
+                                <code>4532 9999 9999 9999</code>
+                                <span>CVV: 999, PIN: 9999</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Smart City Banking API</h3>
+                    <p>Secure, reliable payment processing for the Smart City ecosystem.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="../docs/API.md">Internal API Docs</a></li>
+                        <li><a href="../docs/PUBLIC_API.md">Public API Docs</a></li>
+                        <li><a href="../docs/FEATURES.md">Features</a></li>
+                        <li><a href="../CONTRIBUTING.md">Contributing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="https://github.com/Buchi-dev/BankingSystem_Server/issues">Report Issue</a></li>
+                        <li><a href="mailto:hed-tjyuzon@smu.edu.ph">Email Support</a></li>
+                        <li><a href="https://github.com/Buchi-dev/BankingSystem_Server">GitHub</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">API Agreement</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Smart City Banking System. Licensed under ISC License.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Syntax highlighting
+        document.addEventListener('DOMContentLoaded', () => {
+            hljs.highlightAll();
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabGroup = button.closest('.code-tabs');
+                const tabId = button.dataset.tab;
+                
+                // Remove active class from all tabs in this group
+                tabGroup.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                tabGroup.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                button.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Highlight active section in sidebar
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.sidebar a').forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { rootMargin: '-50% 0px -50% 0px' });
+
+        document.querySelectorAll('.doc-section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
