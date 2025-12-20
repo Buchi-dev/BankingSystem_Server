@@ -17,7 +17,7 @@
                 <div class="logo">
                     <i class="fas fa-university"></i>
                     <span>Smart City Banking API</span>
-                    
+
                 </div>
                 <nav class="main-nav">
                     <a href="#overview" class="nav-link">Overview</a>
@@ -113,7 +113,7 @@
                                 <i class="fas fa-info-circle"></i>
                                 <div>
                                     <strong>Base URL</strong>
-                                    <code>https://api.smartcitybanking.com/api/public</code>
+                                    <code>https://banking-system-server-woad.vercel.app/api/public</code>
                                 </div>
                             </div>
                             <div class="info-box info-box-green">
@@ -198,14 +198,14 @@
                                             <button class="tab-button" data-tab="python-verify">Python</button>
                                         </div>
                                         <div class="tab-content active" id="curl-verify">
-<pre><code class="language-bash">curl https://api.smartcitybanking.com/api/public/verify \
+<pre><code class="language-bash">curl https://banking-system-server-woad.vercel.app/api/public/verify \
   -H "X-API-Key: scb_live_your_api_key_here"</code></pre>
                                         </div>
                                         <div class="tab-content" id="node-verify">
 <pre><code class="language-javascript">const axios = require('axios');
 
 const response = await axios.get(
-  'https://api.smartcitybanking.com/api/public/verify',
+  'https://banking-system-server-woad.vercel.app/api/public/verify',
   {
     headers: {
       'X-API-Key': 'scb_live_your_api_key_here'
@@ -219,7 +219,7 @@ console.log(response.data);</code></pre>
 <pre><code class="language-python">import requests
 
 response = requests.get(
-    'https://api.smartcitybanking.com/api/public/verify',
+    'https://banking-system-server-woad.vercel.app/api/public/verify',
     headers={'X-API-Key': 'scb_live_your_api_key_here'}
 )
 
@@ -429,7 +429,7 @@ Content-Type: application/json</code></pre>
 async function chargeCard() {
   try {
     const response = await axios.post(
-      'https://api.smartcitybanking.com/api/public/transactions/charge',
+      'https://banking-system-server-woad.vercel.app/api/public/transactions/charge',
       {
         cardNumber: '4532123456789012',
         cvv: '123',
@@ -460,7 +460,7 @@ chargeCard();</code></pre>
 import os
 
 def charge_card():
-    url = 'https://api.smartcitybanking.com/api/public/transactions/charge'
+    url = 'https://banking-system-server-woad.vercel.app/api/public/transactions/charge'
     
     payload = {
         'cardNumber': '4532123456789012',
@@ -487,7 +487,7 @@ def charge_card():
 charge_card()</code></pre>
                                 </div>
                                 <div class="tab-content" id="curl-charge">
-<pre><code class="language-bash">curl -X POST https://api.smartcitybanking.com/api/public/transactions/charge \
+<pre><code class="language-bash">curl -X POST https://banking-system-server-woad.vercel.app/api/public/transactions/charge \
   -H "X-API-Key: scb_live_your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{
@@ -647,7 +647,7 @@ charge_card()</code></pre>
 const axios = require('axios');
 
 class SmartCityBankingClient {
-  constructor(apiKey, baseURL = 'https://api.smartcitybanking.com/api/public') {
+  constructor(apiKey, baseURL = 'https://banking-system-server-woad.vercel.app/api/public') {
     this.apiKey = apiKey;
     this.baseURL = baseURL;
     this.axios = axios.create({
