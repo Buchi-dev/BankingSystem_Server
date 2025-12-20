@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const { formatCardNumber, maskCardNumber } = require("../utils/cardGenerator");
 
 /**
  * AUTHENTICATION CONTROLLERS
@@ -27,11 +28,13 @@ const register = async (req, res, next) => {
     }
 
     // Create new user (password will be hashed automatically by model middleware)
+    // Virtual card is auto-generated for personal accounts
     const user = await User.create({
       fullName: { firstName, lastName, middleInitial },
       email,
       password,
       role: role || "user", // Default to user if not specified
+      accountType: "personal", // Personal account gets virtual card
     });
 
     // Generate JWT token
@@ -41,20 +44,35 @@ const register = async (req, res, next) => {
       { expiresIn: "2d" }
     );
 
+    // Build response with virtual card info (shown only once at registration)
+    const responseData = {
+      user: {
+        id: user._id,
+        firstName: user.fullName.firstName,
+        lastName: user.fullName.lastName,
+        middleInitial: user.fullName.middleInitial,
+        email: user.email,
+        role: user.role,
+        accountType: user.accountType,
+      },
+      token,
+    };
+
+    // Include virtual card details (CVV and PIN shown only at registration!)
+    if (user.virtualCard?.cardNumber) {
+      responseData.virtualCard = {
+        cardNumber: formatCardNumber(user.virtualCard.cardNumber),
+        cvv: user._plainCVV, // Only shown once at registration
+        pin: user._plainPIN, // Only shown once at registration
+        expiryDate: user.virtualCard.expiryDate,
+        message: "IMPORTANT: Save your CVV and PIN securely. They will NOT be shown again!",
+      };
+    }
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      data: {
-        user: {
-          id: user._id,
-          firstName: user.fullName.firstName,
-          lastName: user.fullName.lastName,
-          middleInitial: user.fullName.middleInitial,
-          email: user.email,
-          role: user.role,
-        },
-        token,
-      },
+      data: responseData,
     });
   } catch (error) {
     next(error);

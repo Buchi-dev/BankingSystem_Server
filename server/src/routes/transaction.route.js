@@ -2,13 +2,22 @@ const express = require("express");
 const router = express.Router();
 const transactionController = require("../controllers/transaction.controller");
 
-const { auth, validateTransaction } = require("../middlewares");
+const { auth, validateTransaction, validateDeposit, validateWithdraw } = require("../middlewares");
 
 // ============================================
 // PROTECTED ROUTES (Authentication required)
 // ============================================
 
-// Create a new transaction (deposit, withdraw, transfer)
-router.post("/", auth, validateTransaction, transactionController.transferFunds);
+// Get all transactions for authenticated user
+router.get("/", auth, transactionController.getUserTransactions);
+
+// Transfer funds between users
+router.post("/transfer", auth, validateTransaction, transactionController.transferFunds);
+
+// Deposit funds from bank to user wallet
+router.post("/deposit", auth, validateDeposit, transactionController.depositFunds);
+
+// Withdraw funds from user wallet to bank
+router.post("/withdraw", auth, validateWithdraw, transactionController.withdrawFunds);
 
 module.exports = router;

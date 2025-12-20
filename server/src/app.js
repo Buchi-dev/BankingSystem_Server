@@ -3,7 +3,7 @@
  * ======
  * Main Express app configuration.
  * - Sets up middleware (JSON parsing, CORS, etc.)
- * - Mounts all routes
+ * - Mounts all routes (internal & public API)
  * - Handles 404 and error responses
  */
 
@@ -14,6 +14,8 @@ const hpp = require("hpp");
 
 const userRoutes = require("./routes/user.route");
 const transactionRoutes = require("./routes/transaction.route");
+const publicTransactionRoutes = require("./routes/public.transaction.route");
+const businessRoutes = require("./routes/business.route");
 
 const { logger, limiter, speedLimiter, errorHandler, mongoSanitize } = require("./middlewares");
 
@@ -33,16 +35,38 @@ app.use(logger); // Log every request
 // 3. Rate Limiting & Speed Control
 app.use("/api/", limiter, speedLimiter);
 
-// 4. Mount Routes
+// ============================================
+// 4. INTERNAL API ROUTES (JWT Authentication)
+// ============================================
 app.use("/api/users", userRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/business", businessRoutes);
 
-// 5. Root route (optional)
+// ============================================
+// 5. PUBLIC API ROUTES (API Key Authentication)
+// For external Smart City integrations
+// ============================================
+app.use("/api/public", publicTransactionRoutes);
+
+// 6. Root route (API info)
 app.get("/", (req, res) => {
   res.json({ 
     success: true, 
-    message: "API is running!",
-    version: "1.0.0"
+    message: "Smart City Banking API is running!",
+    version: "2.0.0",
+    endpoints: {
+      internal: {
+        users: "/api/users",
+        transactions: "/api/transactions",
+        business: "/api/business",
+      },
+      public: {
+        base: "/api/public",
+        charge: "/api/public/transactions/charge",
+        refund: "/api/public/transactions/refund",
+        verify: "/api/public/cards/verify",
+      },
+    },
   });
 });
 
