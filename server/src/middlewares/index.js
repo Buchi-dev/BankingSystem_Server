@@ -17,6 +17,7 @@ const mongoSanitize = require('./mongoSanitize.middleware');
 const sanitize = require('./sanitize.middleware');
 const { requireBusiness, requireVerifiedBusiness } = require('./business.middleware');
 const { apiAuth, requirePermission, checkTransactionLimit } = require('./apiAuth.middleware');
+const { dynamicCors, internalCors } = require('./cors.middleware');
 
 module.exports = {
   auth,
@@ -40,4 +41,6 @@ module.exports = {
   sanitize,
   requireBusiness,
   requireVerifiedBusiness,
+  dynamicCors,
+  internalCors,
 };

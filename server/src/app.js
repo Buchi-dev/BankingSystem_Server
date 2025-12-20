@@ -8,7 +8,6 @@
  */
 
 const express = require("express");
-const cors = require("cors");
 const helmet = require("helmet");
 const hpp = require("hpp");
 
@@ -17,7 +16,7 @@ const transactionRoutes = require("./routes/transaction.route");
 const publicTransactionRoutes = require("./routes/public.transaction.route");
 const businessRoutes = require("./routes/business.route");
 
-const { logger, limiter, speedLimiter, errorHandler, mongoSanitize, sanitize } = require("./middlewares");
+const { logger, limiter, speedLimiter, errorHandler, mongoSanitize, sanitize, dynamicCors } = require("./middlewares");
 
 const app = express();
 
@@ -26,14 +25,18 @@ app.use(helmet()); // Secure HTTP headers
 app.use(mongoSanitize); // Prevent MongoDB injection (Express 5.x compatible)
 app.use(hpp()); // Prevent HTTP Parameter Pollution
 
-// 2. Global Middleware
-app.use(cors()); // Enable CORS for all routes
+// 2. Dynamic CORS Middleware
+// - Internal routes: permissive CORS for frontend apps
+// - Public API routes: validates Origin against API key's allowedOrigins
+app.use(dynamicCors);
+
+// 3. Global Middleware
 app.use(express.json({ limit: "10mb" })); // Parse JSON bodies with size limit
 app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Parse URL-encoded bodies
 app.use(sanitize); // SECURITY: Sanitize all inputs to prevent XSS attacks
 app.use(logger); // Log every request
 
-// 3. Rate Limiting & Speed Control
+// 4. Rate Limiting & Speed Control
 app.use("/api/", limiter, speedLimiter);
 
 // ============================================

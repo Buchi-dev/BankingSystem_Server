@@ -65,6 +65,38 @@ router.get("/api-keys", auth, requireBusiness, businessController.listAPIKeys);
 router.delete("/api-keys/:keyId", auth, requireBusiness, businessController.revokeAPIKey);
 
 // ============================================
+// CORS / ALLOWED ORIGINS MANAGEMENT
+// ============================================
+
+/**
+ * GET /api/business/api-keys/:keyId/origins
+ * Get allowed origins for an API key
+ * SECURITY: Only business account types can access their own keys
+ */
+router.get("/api-keys/:keyId/origins", auth, requireBusiness, businessController.getKeyOrigins);
+
+/**
+ * PUT /api/business/api-keys/:keyId/origins
+ * Update allowed origins for an API key
+ * SECURITY: Only business account types can access their own keys
+ */
+router.put("/api-keys/:keyId/origins", auth, requireBusiness, businessController.updateKeyOrigins);
+
+/**
+ * POST /api/business/api-keys/:keyId/origins
+ * Add a new allowed origin to an API key
+ * SECURITY: Only business account types can access their own keys
+ */
+router.post("/api-keys/:keyId/origins", auth, requireBusiness, businessController.addKeyOrigin);
+
+/**
+ * DELETE /api/business/api-keys/:keyId/origins
+ * Remove an allowed origin from an API key
+ * SECURITY: Only business account types can access their own keys
+ */
+router.delete("/api-keys/:keyId/origins", auth, requireBusiness, businessController.removeKeyOrigin);
+
+// ============================================
 // ADMIN ROUTES (Admin authentication required)
 // ============================================
 

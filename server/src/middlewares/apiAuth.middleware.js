@@ -73,6 +73,18 @@ const apiAuth = async (req, res, next) => {
       });
     }
 
+    // Check CORS origin whitelist (for browser requests)
+    const requestOrigin = req.headers.origin;
+    if (requestOrigin && !keyDocument.isOriginAllowed(requestOrigin)) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: "ORIGIN_NOT_ALLOWED",
+          message: `Origin '${requestOrigin}' is not in the allowed origins list for this API key. Configure allowed origins in your API key settings.`,
+        },
+      });
+    }
+
     // Check rate limit
     if (!keyDocument.checkRateLimit()) {
       return res.status(429).json({

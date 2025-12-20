@@ -74,6 +74,20 @@ const UserSchema = new mongoose.Schema(
         trim: true,
         match: /^(\+63|0)?[0-9]{10}$/,
       },
+      // Required: Frontend URL for CORS whitelisting
+      websiteUrl: {
+        type: String,
+        trim: true,
+        maxlength: 200,
+        validate: {
+          validator: function(v) {
+            // Allow empty for existing records, but validate format if provided
+            if (!v) return true;
+            return /^https?:\/\/[\w.-]+(:\d+)?(\/.*)?$/.test(v);
+          },
+          message: "Invalid website URL format. Must start with http:// or https://",
+        },
+      },
       isVerified: {
         type: Boolean,
         default: false,

@@ -120,6 +120,32 @@ const APIKeySchema = new mongoose.Schema(
       default: [],
     },
 
+    // CORS allowed origins (required for security)
+    // Supports exact matches and wildcard patterns (e.g., https://*.example.com)
+    allowedOrigins: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: function (origins) {
+          if (!origins || origins.length === 0) return true;
+          return origins.every((origin) => {
+            // Block dangerous wildcards
+            if (origin === "*" || origin === "http://*" || origin === "https://*") {
+              return false;
+            }
+            // Allow localhost for test environment keys only
+            if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+              return this.environment === "test";
+            }
+            // Validate URL pattern (supports wildcards like https://*.domain.com)
+            return /^https?:\/\/(\*\.)?[\w.-]+(:\d+)?$/.test(origin);
+          });
+        },
+        message:
+          "Invalid origin pattern. Use format: https://domain.com or https://*.domain.com. Localhost only allowed for test keys.",
+      },
+    },
+
     // Expiry date (optional)
     expiresAt: {
       type: Date,
@@ -141,8 +167,15 @@ APIKeySchema.index({ keyHash: 1 });
 APIKeySchema.index({ business: 1, isActive: 1 });
 
 // Static method to create a new API key
-APIKeySchema.statics.createKey = async function (businessId, name, permissions = ["charge", "transactions"]) {
-  const plainKey = generateAPIKey("scb_live_");
+APIKeySchema.statics.createKey = async function (
+  businessId,
+  name,
+  permissions = ["charge", "transactions"],
+  allowedOrigins = [],
+  environment = "live"
+) {
+  const prefix = environment === "test" ? "scb_test_" : "scb_live_";
+  const plainKey = generateAPIKey(prefix);
   const keyHash = hashAPIKey(plainKey);
   const keyPrefix = plainKey.substring(0, 12);
 
@@ -152,6 +185,8 @@ APIKeySchema.statics.createKey = async function (businessId, name, permissions =
     keyPrefix,
     name,
     permissions,
+    allowedOrigins,
+    environment,
   });
 
   // Return both the document and the plain key (shown only once)
@@ -253,6 +288,44 @@ APIKeySchema.methods.isIPAllowed = function (ip) {
   }
 
   return this.ipWhitelist.includes(ip);
+};
+
+/**
+ * Match origin against pattern with wildcard support
+ * @param {string} origin - Request origin (e.g., 'https://app.example.com')
+ * @param {string} pattern - Allowed pattern (e.g., 'https://*.example.com')
+ * @returns {boolean}
+ */
+const matchOriginPattern = (origin, pattern) => {
+  if (!origin || !pattern) return false;
+
+  // Exact match
+  if (origin === pattern) return true;
+
+  // Wildcard pattern: https://*.example.com
+  if (pattern.includes("*.")) {
+    // Escape regex special chars except *, then convert * to subdomain regex
+    const regexPattern = pattern
+      .replace(/[.+?^${}()|[\]\\]/g, "\\$&") // Escape regex chars
+      .replace(/\*/g, "[a-zA-Z0-9-]+"); // * matches subdomain only (no dots)
+
+    const regex = new RegExp(`^${regexPattern}$`);
+    return regex.test(origin);
+  }
+
+  return false;
+};
+
+// Method to check if origin is allowed (CORS)
+APIKeySchema.methods.isOriginAllowed = function (origin) {
+  // Empty whitelist = block all (secure by default)
+  // This forces businesses to explicitly configure allowed origins
+  if (!this.allowedOrigins || this.allowedOrigins.length === 0) {
+    return false;
+  }
+
+  // Check if origin matches any allowed pattern
+  return this.allowedOrigins.some((pattern) => matchOriginPattern(origin, pattern));
 };
 
 // Method to revoke key

@@ -104,6 +104,7 @@ describe("Business Controller", () => {
             postalCode: "1000",
           },
           businessPhone: "+639123456789",
+          websiteUrl: "https://teststore.com",
         },
       };
 
@@ -127,6 +128,7 @@ describe("Business Controller", () => {
         password: "SecurePass123!",
         businessInfo: {
           businessName: "Test Store",
+          websiteUrl: "https://teststore.com",
         },
       };
 
@@ -150,6 +152,7 @@ describe("Business Controller", () => {
         businessInfo: {
           businessName: "Test Store",
           isVerified: true,
+          websiteUrl: "https://teststore.com",
         },
       };
 
@@ -158,6 +161,8 @@ describe("Business Controller", () => {
         keyPrefix: "scb_live_abc123",
         name: "Production Key",
         permissions: ["charge", "refund"],
+        allowedOrigins: ["https://teststore.com"],
+        environment: "live",
         isActive: true,
         createdAt: new Date(),
       };
@@ -183,6 +188,7 @@ describe("Business Controller", () => {
           success: true,
           data: expect.objectContaining({
             key: "scb_live_test123456789",
+            allowedOrigins: ["https://teststore.com"],
           }),
         })
       );
