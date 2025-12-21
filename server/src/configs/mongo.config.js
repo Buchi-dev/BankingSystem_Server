@@ -35,11 +35,13 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   try {
     // Attempt to connect to MongoDB
-    // process.env.MONGO_URI should be set in .env file
-    // Falls back to local MongoDB if not set
-    const conn = await mongoose.connect(
-      process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase'
-    );
+    // Check multiple possible environment variable names for flexibility
+    const mongoUri = process.env.MONGO_URI || 
+                     process.env.MONGODB_URI || 
+                     process.env.DATABASE_URL || 
+                     'mongodb://localhost:27017/mydatabase';
+    
+    const conn = await mongoose.connect(mongoUri);
     
     // Log successful connection with host information
     console.log(`MongoDB Connected: ${conn.connection.host}`);

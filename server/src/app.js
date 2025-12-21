@@ -18,6 +18,9 @@ const { logger, limiter, speedLimiter, errorHandler, mongoSanitize, sanitize, dy
 
 const app = express();
 
+// Trust proxy for production deployments (Vercel, Heroku, etc.)
+app.set('trust proxy', 1);
+
 // 1. Security Middleware
 app.use(helmet()); // Secure HTTP headers
 app.use(mongoSanitize); // Prevent MongoDB injection (Express 5.x compatible)
