@@ -31,13 +31,13 @@ Tokens are obtained via the login endpoint and are valid for 7 days (configurabl
 
 ## User Management
 
-Base path: `/api/users`
+Base path: `/api/v1/users`
 
 ### Register New User
 
 Create a new user account with automatic virtual card generation.
 
-**Endpoint:** `POST /api/users/register`
+**Endpoint:** `POST /api/v1/users/register`
 
 **Authentication:** None (public)
 
@@ -123,7 +123,7 @@ Create a new user account with automatic virtual card generation.
 
 Authenticate and receive JWT token.
 
-**Endpoint:** `POST /api/users/login`
+**Endpoint:** `POST /api/v1/users/login`
 
 **Authentication:** None (public)
 
@@ -182,7 +182,7 @@ Authenticate and receive JWT token.
 
 Retrieve authenticated user's profile information.
 
-**Endpoint:** `GET /api/users/profile`
+**Endpoint:** `GET /api/v1/users/profile`
 
 **Authentication:** Required (JWT)
 
@@ -230,7 +230,7 @@ Authorization: Bearer <jwt_token>
 
 Retrieve list of all users in the system.
 
-**Endpoint:** `GET /api/users`
+**Endpoint:** `GET /api/v1/users`
 
 **Authentication:** Required (JWT) + Admin Role
 
@@ -276,7 +276,7 @@ Authorization: Bearer <admin_jwt_token>
 
 Retrieve specific user details by ID.
 
-**Endpoint:** `GET /api/users/:id`
+**Endpoint:** `GET /api/v1/users/:id`
 
 **Authentication:** Required (JWT) + Admin Role
 
@@ -316,7 +316,7 @@ Retrieve specific user details by ID.
 
 Create a new user account (admin function).
 
-**Endpoint:** `POST /api/users`
+**Endpoint:** `POST /api/v1/users`
 
 **Authentication:** Required (JWT) + Admin Role
 
@@ -349,7 +349,7 @@ Create a new user account (admin function).
 
 Update user information.
 
-**Endpoint:** `PUT /api/users/:id`
+**Endpoint:** `PUT /api/v1/users/:id`
 
 **Authentication:** Required (JWT) + Admin Role
 
@@ -382,7 +382,7 @@ Update user information.
 
 Delete a specific user.
 
-**Endpoint:** `DELETE /api/users/:id`
+**Endpoint:** `DELETE /api/v1/users/:id`
 
 **Authentication:** Required (JWT) + Admin Role
 
@@ -401,7 +401,7 @@ Delete a specific user.
 
 ## Transaction Management
 
-Base path: `/api/transactions`
+Base path: `/api/v1/transactions`
 
 All transaction endpoints require JWT authentication.
 
@@ -409,7 +409,7 @@ All transaction endpoints require JWT authentication.
 
 Retrieve all transactions for the authenticated user.
 
-**Endpoint:** `GET /api/transactions`
+**Endpoint:** `GET /api/v1/transactions`
 
 **Authentication:** Required (JWT)
 
@@ -460,7 +460,7 @@ Retrieve all transactions for the authenticated user.
 
 Transfer money between user accounts.
 
-**Endpoint:** `POST /api/transactions/transfer`
+**Endpoint:** `POST /api/v1/transactions/transfer`
 
 **Authentication:** Required (JWT)
 
@@ -526,7 +526,7 @@ Transfer money between user accounts.
 
 Deposit funds from bank to user wallet.
 
-**Endpoint:** `POST /api/transactions/deposit`
+**Endpoint:** `POST /api/v1/transactions/deposit`
 
 **Authentication:** Required (JWT)
 
@@ -567,7 +567,7 @@ Deposit funds from bank to user wallet.
 
 Withdraw funds from user wallet to bank.
 
-**Endpoint:** `POST /api/transactions/withdraw`
+**Endpoint:** `POST /api/v1/transactions/withdraw`
 
 **Authentication:** Required (JWT)
 
@@ -617,7 +617,7 @@ Withdraw funds from user wallet to bank.
 
 View bank balance and statistics.
 
-**Endpoint:** `GET /api/transactions/bank/status`
+**Endpoint:** `GET /api/v1/transactions/bank/status`
 
 **Authentication:** Required (JWT) + Admin Role
 
@@ -639,13 +639,13 @@ View bank balance and statistics.
 
 ## Business Account Management
 
-Base path: `/api/business`
+Base path: `/api/v1/business`
 
 ### Register Business Account
 
 Create a new business account with merchant capabilities.
 
-**Endpoint:** `POST /api/business/register`
+**Endpoint:** `POST /api/v1/business/register`
 
 **Authentication:** None (public)
 
@@ -720,7 +720,7 @@ Create a new business account with merchant capabilities.
 
 Retrieve business account information.
 
-**Endpoint:** `GET /api/business/profile`
+**Endpoint:** `GET /api/v1/business/profile`
 
 **Authentication:** Required (JWT) + Business Account Type
 
@@ -759,7 +759,7 @@ Retrieve business account information.
 
 Create a new API key for external integrations.
 
-**Endpoint:** `POST /api/business/api-keys`
+**Endpoint:** `POST /api/v1/business/api-keys`
 
 **Authentication:** Required (JWT) + Verified Business Account
 
@@ -814,7 +814,7 @@ Create a new API key for external integrations.
 
 Get all API keys for the business.
 
-**Endpoint:** `GET /api/business/api-keys`
+**Endpoint:** `GET /api/v1/business/api-keys`
 
 **Authentication:** Required (JWT) + Business Account Type
 
@@ -847,7 +847,7 @@ Get all API keys for the business.
 
 Deactivate an API key.
 
-**Endpoint:** `DELETE /api/business/api-keys/:keyId`
+**Endpoint:** `DELETE /api/v1/business/api-keys/:keyId`
 
 **Authentication:** Required (JWT) + Business Account Type
 
@@ -868,7 +868,7 @@ Deactivate an API key.
 
 Retrieve CORS origins for an API key.
 
-**Endpoint:** `GET /api/business/api-keys/:keyId/origins`
+**Endpoint:** `GET /api/v1/business/api-keys/:keyId/origins`
 
 **Authentication:** Required (JWT) + Business Account Type
 
@@ -891,7 +891,7 @@ Retrieve CORS origins for an API key.
 
 Replace all allowed origins for an API key.
 
-**Endpoint:** `PUT /api/business/api-keys/:keyId/origins`
+**Endpoint:** `PUT /api/v1/business/api-keys/:keyId/origins`
 
 **Authentication:** Required (JWT) + Business Account Type
 
@@ -925,7 +925,7 @@ Replace all allowed origins for an API key.
 
 Add a single origin to the whitelist.
 
-**Endpoint:** `POST /api/business/api-keys/:keyId/origins`
+**Endpoint:** `POST /api/v1/business/api-keys/:keyId/origins`
 
 **Authentication:** Required (JWT) + Business Account Type
 
@@ -950,7 +950,7 @@ Add a single origin to the whitelist.
 
 Remove a specific origin from the whitelist.
 
-**Endpoint:** `DELETE /api/business/api-keys/:keyId/origins`
+**Endpoint:** `DELETE /api/v1/business/api-keys/:keyId/origins`
 
 **Authentication:** Required (JWT) + Business Account Type
 
@@ -975,7 +975,7 @@ Remove a specific origin from the whitelist.
 
 View all businesses awaiting verification.
 
-**Endpoint:** `GET /api/business/pending`
+**Endpoint:** `GET /api/v1/business/pending`
 
 **Authentication:** Required (JWT) + Admin Role
 
@@ -1009,7 +1009,7 @@ View all businesses awaiting verification.
 
 View all verified business accounts.
 
-**Endpoint:** `GET /api/business/verified`
+**Endpoint:** `GET /api/v1/business/verified`
 
 **Authentication:** Required (JWT) + Admin Role
 
@@ -1042,7 +1042,7 @@ View all verified business accounts.
 
 Approve a business account for API key generation.
 
-**Endpoint:** `PUT /api/business/:businessId/verify`
+**Endpoint:** `PUT /api/v1/business/:businessId/verify`
 
 **Authentication:** Required (JWT) + Admin Role
 

@@ -506,10 +506,10 @@ describe("Card Validation", () => {
 const request = require("supertest");
 const app = require("../../src/app");
 
-describe("POST /api/users/register", () => {
+describe("POST /api/v1/users/register", () => {
   test("should register new user successfully", async () => {
     const response = await request(app)
-      .post("/api/users/register")
+      .post("/api/v1/users/register")
       .send({
         fullName: {
           firstName: "Juan",
@@ -722,17 +722,17 @@ try {
 **Using curl:**
 ```bash
 # Register user
-curl -X POST http://localhost:5000/api/users/register \
+curl -X POST http://localhost:5000/api/v1/users/register \
   -H "Content-Type: application/json" \
   -d '{"fullName":{"firstName":"Juan","lastName":"Cruz"},"email":"juan@smu.edu.ph","password":"pass123"}'
 
 # Login
-curl -X POST http://localhost:5000/api/users/login \
+curl -X POST http://localhost:5000/api/v1/users/login \
   -H "Content-Type: application/json" \
   -d '{"email":"juan@smu.edu.ph","password":"pass123"}'
 
 # Authenticated request
-curl http://localhost:5000/api/users/profile \
+curl http://localhost:5000/api/v1/users/profile \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 

@@ -31,9 +31,9 @@ X-API-Key: scb_live_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
 
 ### Obtaining an API Key
 
-1. **Register a business account** via `POST /api/business/register`
+1. **Register a business account** via `POST /api/v1/business/register`
 2. **Wait for admin verification** (required for API key generation)
-3. **Generate API key** via `POST /api/business/api-keys`
+3. **Generate API key** via `POST /api/v1/business/api-keys`
 4. **Configure permissions and origins** for your API key
 
 ### API Key Format
@@ -60,7 +60,7 @@ scb_live_<random_64_character_string>
 const axios = require('axios');
 
 const API_KEY = process.env.SCB_API_KEY;
-const API_BASE_URL = 'https://api.smartcitybanking.com/api/public';
+const API_BASE_URL = 'https://api.smartcitybanking.com/api/v1/public';
 
 // Verify API key is working
 async function verifyApiKey() {
@@ -107,7 +107,7 @@ async function chargeCard(cardNumber, cvv, amount, description) {
 
 ## API Endpoints
 
-Base URL: `/api/public`
+Base URL: `/api/v1/public`
 
 ### Verification
 
@@ -115,7 +115,7 @@ Base URL: `/api/public`
 
 Test if your API key is valid and properly configured.
 
-**Endpoint:** `GET /api/public/verify`
+**Endpoint:** `GET /api/v1/public/verify`
 
 **Authentication:** API Key required
 
@@ -164,7 +164,7 @@ X-API-Key: scb_live_abc123...
 
 Process a payment by charging a customer's virtual card.
 
-**Endpoint:** `POST /api/public/transactions/charge`
+**Endpoint:** `POST /api/v1/public/transactions/charge`
 
 **Authentication:** API Key required
 
@@ -311,7 +311,7 @@ Process a payment by charging a customer's virtual card.
 
 Process a refund for a previously charged transaction.
 
-**Endpoint:** `POST /api/public/transactions/refund`
+**Endpoint:** `POST /api/v1/public/transactions/refund`
 
 **Authentication:** API Key required
 
@@ -411,7 +411,7 @@ Process a refund for a previously charged transaction.
 
 Retrieve transaction history for your business.
 
-**Endpoint:** `GET /api/public/transactions`
+**Endpoint:** `GET /api/v1/public/transactions`
 
 **Authentication:** API Key required
 
@@ -426,7 +426,7 @@ Retrieve transaction history for your business.
 
 **Example Request:**
 ```http
-GET /api/public/transactions?limit=20&page=1&status=completed
+GET /api/v1/public/transactions?limit=20&page=1&status=completed
 X-API-Key: scb_live_abc123...
 ```
 
@@ -482,7 +482,7 @@ X-API-Key: scb_live_abc123...
 
 Retrieve specific transaction details.
 
-**Endpoint:** `GET /api/public/transactions/:reference`
+**Endpoint:** `GET /api/v1/public/transactions/:reference`
 
 **Authentication:** API Key required
 
@@ -526,7 +526,7 @@ Retrieve specific transaction details.
 
 Verify a card without charging (useful for card validation).
 
-**Endpoint:** `POST /api/public/cards/verify`
+**Endpoint:** `POST /api/v1/public/cards/verify`
 
 **Authentication:** API Key required
 
@@ -594,7 +594,7 @@ Verify a card without charging (useful for card validation).
 
 Check your business wallet balance.
 
-**Endpoint:** `GET /api/public/balance`
+**Endpoint:** `GET /api/v1/public/balance`
 
 **Authentication:** API Key required
 
@@ -716,13 +716,13 @@ For browser-based integrations, configure allowed origins in your API key settin
 **Configure via API:**
 ```javascript
 // Add allowed origin
-POST /api/business/api-keys/:keyId/origins
+POST /api/v1/business/api-keys/:keyId/origins
 {
   "origin": "https://yourdomain.com"
 }
 
 // Update all origins
-PUT /api/business/api-keys/:keyId/origins
+PUT /api/v1/business/api-keys/:keyId/origins
 {
   "allowedOrigins": [
     "https://yourdomain.com",
@@ -736,7 +736,7 @@ PUT /api/business/api-keys/:keyId/origins
 Optionally restrict API key usage to specific IP addresses:
 
 ```javascript
-PUT /api/business/api-keys/:keyId
+PUT /api/v1/business/api-keys/:keyId
 {
   "allowedIPs": ["203.0.113.1", "203.0.113.2"]
 }
@@ -778,7 +778,7 @@ Invalid CVV: Use any CVV except the correct one
 
 ### Testing Checklist
 
-- [ ] Verify API key works (`GET /api/public/verify`)
+- [ ] Verify API key works (`GET /api/v1/public/verify`)
 - [ ] Test successful charge
 - [ ] Test insufficient funds error
 - [ ] Test invalid CVV error
@@ -795,7 +795,7 @@ Invalid CVV: Use any CVV except the correct one
 const axios = require('axios');
 
 const API_KEY = process.env.SCB_TEST_API_KEY;
-const API_URL = 'http://localhost:5000/api/public';
+const API_URL = 'http://localhost:5000/api/v1/public';
 
 describe('Public API Tests', () => {
   test('API key verification', async () => {
@@ -832,7 +832,7 @@ describe('Public API Tests', () => {
 class SmartCityBankingClient {
   constructor(apiKey) {
     this.apiKey = apiKey;
-    this.baseURL = 'https://api.smartcitybanking.com/api/public';
+    this.baseURL = 'https://api.smartcitybanking.com/api/v1/public';
   }
 
   async chargeCard(cardNumber, cvv, amount, description) {

@@ -133,7 +133,7 @@ http://localhost:5000/api
 1. **JWT Authentication** (Internal API)
    - Used for: User management, internal transactions, business management
    - Header: `Authorization: Bearer <token>`
-   - Obtain via: `POST /api/users/login`
+   - Obtain via: `POST /api/v1/users/login`
 
 2. **API Key Authentication** (Public API)
    - Used for: External integrations, merchant payments
@@ -143,22 +143,22 @@ http://localhost:5000/api
 ### Main Endpoints
 
 #### Internal API (JWT Auth)
-- `POST /api/users/register` - Register new user
-- `POST /api/users/login` - User login
-- `GET /api/users/profile` - Get user profile
-- `POST /api/transactions/transfer` - Transfer funds
-- `POST /api/transactions/deposit` - Deposit from bank
-- `POST /api/transactions/withdraw` - Withdraw to bank
-- `POST /api/business/register` - Register business account
-- `POST /api/business/api-keys` - Generate API key
+- `POST /api/v1/users/register` - Register new user
+- `POST /api/v1/users/login` - User login
+- `GET /api/v1/users/profile` - Get user profile
+- `POST /api/v1/transactions/transfer` - Transfer funds
+- `POST /api/v1/transactions/deposit` - Deposit from bank
+- `POST /api/v1/transactions/withdraw` - Withdraw to bank
+- `POST /api/v1/business/register` - Register business account
+- `POST /api/v1/business/api-keys` - Generate API key
 
 #### Public API (API Key Auth)
-- `GET /api/public/verify` - Verify API key
-- `POST /api/public/transactions/charge` - Charge customer card
-- `POST /api/public/transactions/refund` - Refund transaction
-- `GET /api/public/transactions` - Get transaction history
-- `POST /api/public/cards/verify` - Verify card without charging
-- `GET /api/public/balance` - Get business balance
+- `GET /api/v1/public/verify` - Verify API key
+- `POST /api/v1/public/transactions/charge` - Charge customer card
+- `POST /api/v1/public/transactions/refund` - Refund transaction
+- `GET /api/v1/public/transactions` - Get transaction history
+- `POST /api/v1/public/cards/verify` - Verify card without charging
+- `GET /api/v1/public/balance` - Get business balance
 
 See [API Documentation](docs/API.md) and [Public API Documentation](docs/PUBLIC_API.md) for complete details.
 
