@@ -39,7 +39,7 @@ const connectDB = async () => {
     const mongoUri = process.env.MONGO_URI || 
                      process.env.MONGODB_URI || 
                      process.env.DATABASE_URL || 
-                     'mongodb://localhost:27017/mydatabase';
+                     'mongodb+srv://hedtjyuzon_db_user:3iTnNgJbnjPF27nv@cluster0.qidesdz.mongodb.net/BankingSystemDB?retryWrites=true&w=majority';
     
     const conn = await mongoose.connect(mongoUri);
     
