@@ -112,7 +112,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       const timestamp = Date.now();
       
       const res = await request(app)
-        .post("/api/users/register")
+        .post("/api/v1/users/register")
         .send({
           fullName: {
             firstName: "Integration",
@@ -154,7 +154,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       const depositAmount = 10000;
       
       const res = await request(app)
-        .post("/api/transactions/deposit")
+        .post("/api/v1/transactions/deposit")
         .set("Authorization", `Bearer ${customerToken}`)
         .send({ amount: depositAmount });
 
@@ -183,7 +183,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       const timestamp = Date.now();
       
       const res = await request(app)
-        .post("/api/business/register")
+        .post("/api/v1/business/register")
         .send({
           fullName: {
             firstName: "Integration",
@@ -214,7 +214,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should NOT allow unverified business to create API key", async () => {
       const res = await request(app)
-        .post("/api/business/api-keys")
+        .post("/api/v1/business/api-keys")
         .set("Authorization", `Bearer ${businessToken}`)
         .send({
           name: "IntegrationTest Key",
@@ -254,7 +254,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("4. API Key Generation", () => {
     test("should allow verified business to create API key", async () => {
       const res = await request(app)
-        .post("/api/business/api-keys")
+        .post("/api/v1/business/api-keys")
         .set("Authorization", `Bearer ${businessToken}`)
         .send({
           name: `IntegrationTest API Key ${Date.now()}`,
@@ -273,7 +273,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should list business API keys", async () => {
       const res = await request(app)
-        .get("/api/business/api-keys")
+        .get("/api/v1/business/api-keys")
         .set("Authorization", `Bearer ${businessToken}`);
 
       expect(res.status).toBe(200);
@@ -289,7 +289,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("5. Public API - Authentication", () => {
     test("should reject request without API key", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .send({
           cardNumber: "4111111111111111",
           cvv: "123",
@@ -303,7 +303,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject request with invalid API key", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", "scb_live_invalid_key_12345")
         .send({
           cardNumber: "4111111111111111",
@@ -323,7 +323,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("6. Public API - Card Verification", () => {
     test("should reject invalid card number format", async () => {
       const res = await request(app)
-        .post("/api/public/cards/verify")
+        .post("/api/v1/public/cards/verify")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: "1234567890",
@@ -336,7 +336,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should return not found for non-existent card", async () => {
       const res = await request(app)
-        .post("/api/public/cards/verify")
+        .post("/api/v1/public/cards/verify")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: "4111111111111111",
@@ -350,7 +350,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should verify existing customer card", async () => {
       const res = await request(app)
-        .post("/api/public/cards/verify")
+        .post("/api/v1/public/cards/verify")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -366,7 +366,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject card verification with wrong CVV", async () => {
       const res = await request(app)
-        .post("/api/public/cards/verify")
+        .post("/api/v1/public/cards/verify")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -387,7 +387,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       const chargeAmount = 500;
       
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -426,7 +426,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should charge another amount successfully", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -444,7 +444,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       // Customer has ~8249.50 remaining after previous charges
       // Try to charge 9000 which is less than daily limit (50000) but more than balance
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -460,7 +460,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject negative amount", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -474,7 +474,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject zero amount", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -493,7 +493,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("8. Public API - Transaction History", () => {
     test("should return business transactions", async () => {
       const res = await request(app)
-        .get("/api/public/transactions")
+        .get("/api/v1/public/transactions")
         .set("X-API-Key", apiKeyPlain);
 
       expect(res.status).toBe(200);
@@ -506,7 +506,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should support pagination", async () => {
       const res = await request(app)
-        .get("/api/public/transactions")
+        .get("/api/v1/public/transactions")
         .set("X-API-Key", apiKeyPlain)
         .query({ page: 1, limit: 1 });
 
@@ -526,7 +526,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("9. Public API - Balance Check", () => {
     test("should return business balance", async () => {
       const res = await request(app)
-        .get("/api/public/balance")
+        .get("/api/v1/public/balance")
         .set("X-API-Key", apiKeyPlain);
 
       expect(res.status).toBe(200);
@@ -546,11 +546,11 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     test("should track API usage statistics", async () => {
       // Make a few more requests
       await request(app)
-        .get("/api/public/balance")
+        .get("/api/v1/public/balance")
         .set("X-API-Key", apiKeyPlain);
       
       await request(app)
-        .get("/api/public/transactions")
+        .get("/api/v1/public/transactions")
         .set("X-API-Key", apiKeyPlain);
 
       // Check API key usage in database
@@ -571,7 +571,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("11. Business Profile", () => {
     test("should return business profile with stats", async () => {
       const res = await request(app)
-        .get("/api/business/profile")
+        .get("/api/v1/business/profile")
         .set("Authorization", `Bearer ${businessToken}`);
 
       expect(res.status).toBe(200);
@@ -591,7 +591,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("12. Security - NoSQL Injection Attacks", () => {
     test("should block $gt operator in card number", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: { $gt: "" },
@@ -607,7 +607,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should block $ne operator in CVV", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -621,7 +621,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should block $where operator injection", async () => {
       const res = await request(app)
-        .post("/api/public/cards/verify")
+        .post("/api/v1/public/cards/verify")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: { $where: "this.cardNumber" },
@@ -636,7 +636,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should block $regex operator in email during registration", async () => {
       const res = await request(app)
-        .post("/api/users/register")
+        .post("/api/v1/users/register")
         .send({
           fullName: { firstName: "Hacker", lastName: "Test" },
           email: { $regex: ".*" },
@@ -649,7 +649,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should block nested MongoDB operators", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: { $or: [{ $gt: "" }, { $lt: "z" }] },
@@ -665,7 +665,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should block dot notation injection", async () => {
       const res = await request(app)
-        .post("/api/business/register")
+        .post("/api/v1/business/register")
         .send({
           fullName: { firstName: "Test", lastName: "User" },
           email: "injection.test.hacker@smu.edu.ph",
@@ -692,7 +692,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("13. Security - XSS & Malicious Input", () => {
     test("should handle script tag in description", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -712,7 +712,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     test("should handle HTML injection in business name", async () => {
       const timestamp = Date.now();
       const res = await request(app)
-        .post("/api/business/register")
+        .post("/api/v1/business/register")
         .send({
           fullName: { firstName: "XSS", lastName: "Tester" },
           email: `integration.test.xss.${timestamp}@smu.edu.ph`,
@@ -731,7 +731,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should handle SQL-like injection attempts", async () => {
       const res = await request(app)
-        .post("/api/public/cards/verify")
+        .post("/api/v1/public/cards/verify")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: "4111111111111111'; DROP TABLE users;--",
@@ -747,7 +747,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     test("should handle extremely long input (buffer overflow attempt)", async () => {
       const longString = "A".repeat(100000);
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -762,7 +762,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should handle null bytes in input", async () => {
       const res = await request(app)
-        .post("/api/public/cards/verify")
+        .post("/api/v1/public/cards/verify")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: "4111111111111111\x00",
@@ -775,7 +775,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should handle unicode/emoji in inputs", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -799,7 +799,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       // Simulate rapid invalid API key attempts
       for (let i = 0; i < 5; i++) {
         const res = await request(app)
-          .post("/api/public/transactions/charge")
+          .post("/api/v1/public/transactions/charge")
           .set("X-API-Key", `scb_live_fake_key_${i}`)
           .send({
             cardNumber: "4111111111111111",
@@ -822,7 +822,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       for (const cvv of wrongCVVs) {
         const res = await request(app)
-          .post("/api/public/cards/verify")
+          .post("/api/v1/public/cards/verify")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -845,7 +845,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       // Rapid small charges
       for (let i = 0; i < 3; i++) {
         const res = await request(app)
-          .post("/api/public/transactions/charge")
+          .post("/api/v1/public/transactions/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -869,7 +869,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       
       for (let i = 0; i < 5; i++) {
         const res = await request(app)
-          .post("/api/users/login")
+          .post("/api/v1/users/login")
           .send({
             email: "nonexistent@smu.edu.ph",
             password: `wrongpassword${i}`,
@@ -893,7 +893,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       const fakeToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMzQ1Njc4OTAiLCJlbWFpbCI6ImZha2VAc211LmVkdS5waCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxNjIzOTAyMn0.fake_signature";
       
       const res = await request(app)
-        .get("/api/business/profile")
+        .get("/api/v1/business/profile")
         .set("Authorization", `Bearer ${fakeToken}`);
 
       expect(res.status).toBe(401);
@@ -905,7 +905,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       const tamperedToken = businessToken.slice(0, -10) + "tampered12";
       
       const res = await request(app)
-        .get("/api/business/profile")
+        .get("/api/v1/business/profile")
         .set("Authorization", `Bearer ${tamperedToken}`);
 
       expect(res.status).toBe(401);
@@ -914,7 +914,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject missing authorization header", async () => {
       const res = await request(app)
-        .get("/api/business/profile");
+        .get("/api/v1/business/profile");
 
       expect(res.status).toBe(401);
       console.log("   🛡️ Missing authorization header rejected");
@@ -922,7 +922,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject malformed authorization header", async () => {
       const res = await request(app)
-        .get("/api/business/profile")
+        .get("/api/v1/business/profile")
         .set("Authorization", "NotBearer token123");
 
       expect(res.status).toBe(401);
@@ -931,7 +931,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should prevent customer from accessing business routes", async () => {
       const res = await request(app)
-        .get("/api/business/api-keys")
+        .get("/api/v1/business/api-keys")
         .set("Authorization", `Bearer ${customerToken}`);
 
       // ⚠️ VULNERABILITY FOUND: Customer can access business routes
@@ -951,7 +951,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     test("should prevent accessing other business data via API key", async () => {
       // The API key should only return data for its own business
       const res = await request(app)
-        .get("/api/public/transactions")
+        .get("/api/v1/public/transactions")
         .set("X-API-Key", apiKeyPlain)
         .query({ businessId: "000000000000000000000000" }); // Fake business ID
 
@@ -964,7 +964,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     test("should reject revoked API key", async () => {
       // Create a new API key, then revoke it
       const createRes = await request(app)
-        .post("/api/business/api-keys")
+        .post("/api/v1/business/api-keys")
         .set("Authorization", `Bearer ${businessToken}`)
         .send({
           name: `IntegrationTest Revoke Key ${Date.now()}`,
@@ -981,7 +981,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       if (!keyId) {
         // If API doesn't return ID, we need to fetch it
         const listRes = await request(app)
-          .get("/api/business/api-keys")
+          .get("/api/v1/business/api-keys")
           .set("Authorization", `Bearer ${businessToken}`);
         
         const revokeKey = listRes.body.data.find(k => k.name.includes("Revoke Key"));
@@ -992,7 +992,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
           
           if (revokeRes.status === 200) {
             const useRes = await request(app)
-              .get("/api/public/balance")
+              .get("/api/v1/public/balance")
               .set("X-API-Key", keyToRevoke);
             expect(useRes.status).toBe(401);
             console.log("   🛡️ Revoked API key correctly rejected");
@@ -1009,7 +1009,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
         if (revokeRes.status === 200) {
           // Try to use revoked key
           const useRes = await request(app)
-            .get("/api/public/balance")
+            .get("/api/v1/public/balance")
             .set("X-API-Key", keyToRevoke);
           expect(useRes.status).toBe(401);
           console.log("   🛡️ Revoked API key correctly rejected");
@@ -1027,7 +1027,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
   describe("16. Security - Input Manipulation & Edge Cases", () => {
     test("should reject amount with scientific notation exploit", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -1041,7 +1041,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject amount as string with hidden characters", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -1055,7 +1055,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject extremely large amount (overflow)", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -1069,7 +1069,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject NaN amount", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -1083,7 +1083,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject Infinity amount", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -1097,7 +1097,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should handle array injection in single value fields", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: [customerCardNumber, "4111111111111111"],
@@ -1113,7 +1113,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should handle prototype pollution attempt", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -1131,7 +1131,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     test("should reject mass assignment of sensitive fields", async () => {
       const timestamp = Date.now();
       const res = await request(app)
-        .post("/api/users/register")
+        .post("/api/v1/users/register")
         .send({
           fullName: { firstName: "Mass", lastName: "Assignment" },
           email: `integration.test.mass.${timestamp}@smu.edu.ph`,
@@ -1160,7 +1160,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should handle request with extra unknown fields", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -1180,7 +1180,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should handle CVV with leading zeros", async () => {
       const res = await request(app)
-        .post("/api/public/cards/verify")
+        .post("/api/v1/public/cards/verify")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: customerCardNumber,
@@ -1194,7 +1194,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject card number with spaces/dashes injection", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", apiKeyPlain)
         .send({
           cardNumber: "4111-1111-1111-1111",
@@ -1217,7 +1217,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should create API key with limited permissions", async () => {
       const res = await request(app)
-        .post("/api/business/api-keys")
+        .post("/api/v1/business/api-keys")
         .set("Authorization", `Bearer ${businessToken}`)
         .send({
           name: `IntegrationTest Limited Key ${Date.now()}`,
@@ -1232,7 +1232,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should allow balance check with limited key", async () => {
       const res = await request(app)
-        .get("/api/public/balance")
+        .get("/api/v1/public/balance")
         .set("X-API-Key", limitedApiKey);
 
       expect(res.status).toBe(200);
@@ -1241,7 +1241,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject charge with balance-only key", async () => {
       const res = await request(app)
-        .post("/api/public/transactions/charge")
+        .post("/api/v1/public/transactions/charge")
         .set("X-API-Key", limitedApiKey)
         .send({
           cardNumber: customerCardNumber,
@@ -1256,7 +1256,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject transaction history with balance-only key", async () => {
       const res = await request(app)
-        .get("/api/public/transactions")
+        .get("/api/v1/public/transactions")
         .set("X-API-Key", limitedApiKey);
 
       expect(res.status).toBe(403);
@@ -1268,7 +1268,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       if (!limitedKeyId) {
         // If ID wasn't captured, try to find it
         const listRes = await request(app)
-          .get("/api/business/api-keys")
+          .get("/api/v1/business/api-keys")
           .set("Authorization", `Bearer ${businessToken}`);
         
         const limitedKey = listRes.body.data?.find(k => k.name.includes("Limited Key"));
@@ -1302,7 +1302,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
       console.log("\n🔐 Testing API Key Verification Endpoint...");
       
       const res = await request(app)
-        .get("/api/public/verify")
+        .get("/api/v1/public/verify")
         .set("X-API-Key", apiKeyPlain)
         .expect(200);  // ← Fixed: expect 200 for valid key, not 401
       
@@ -1318,7 +1318,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should return API key permissions in verify response", async () => {
       const res = await request(app)
-        .get("/api/public/verify")
+        .get("/api/v1/public/verify")
         .set("X-API-Key", apiKeyPlain);
 
       expect(res.status).toBe(200);
@@ -1328,7 +1328,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should return allowed origins in verify response", async () => {
       const res = await request(app)
-        .get("/api/public/verify")
+        .get("/api/v1/public/verify")
         .set("X-API-Key", apiKeyPlain);
 
       expect(res.status).toBe(200);
@@ -1338,7 +1338,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject verify with invalid API key", async () => {
       const res = await request(app)
-        .get("/api/public/verify")
+        .get("/api/v1/public/verify")
         .set("X-API-Key", "invalid-api-key-12345");
 
       expect(res.status).toBe(401);
@@ -1347,7 +1347,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
     test("should reject verify without API key", async () => {
       const res = await request(app)
-        .get("/api/public/verify");
+        .get("/api/v1/public/verify");
 
       expect(res.status).toBe(401);
       console.log("   🛡️ Missing API key rejected");
@@ -1364,7 +1364,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
         console.log("\n🛡️ Testing NoSQL Injection Prevention...");
         
         const res = await request(app)
-          .post("/api/public/balance")
+          .post("/api/v1/public/balance")
           .set("X-API-Key", apiKeyPlain)
           .send({
             accountNumber: { $gt: "" }  // NoSQL injection attempt
@@ -1377,7 +1377,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should reject NoSQL injection in card number", async () => {
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: { $regex: ".*" },  // NoSQL injection attempt
@@ -1392,7 +1392,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should reject $where injection attempt", async () => {
         const res = await request(app)
-          .post("/api/public/balance")
+          .post("/api/v1/public/balance")
           .set("X-API-Key", apiKeyPlain)
           .send({
             accountNumber: "test",
@@ -1411,7 +1411,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
         const maliciousDescription = '<script>alert("xss")</script>Legitimate description';
         
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -1430,7 +1430,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should sanitize HTML entities in transaction description", async () => {
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -1451,7 +1451,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     describe("API Key Security", () => {
       test("should not expose raw API key in responses", async () => {
         const res = await request(app)
-          .get("/api/public/verify")
+          .get("/api/v1/public/verify")
           .set("X-API-Key", apiKeyPlain);
 
         const responseString = JSON.stringify(res.body);
@@ -1464,7 +1464,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
         const longKey = "A".repeat(10000);
         
         const res = await request(app)
-          .get("/api/public/verify")
+          .get("/api/v1/public/verify")
           .set("X-API-Key", longKey);
 
         expect([400, 401, 413, 414]).toContain(res.status);
@@ -1482,7 +1482,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
           const port = server.address().port;
           
           const res = await request(`http://localhost:${port}`)
-            .get("/api/public/verify")
+            .get("/api/v1/public/verify")
             .set("X-API-Key", "valid\x00injected");
 
           // If somehow it goes through, should be rejected
@@ -1509,7 +1509,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     describe("Rate Limiting", () => {
       test("should have rate limiting headers in response", async () => {
         const res = await request(app)
-          .get("/api/public/verify")
+          .get("/api/v1/public/verify")
           .set("X-API-Key", apiKeyPlain);
 
         // Check for common rate limit headers
@@ -1530,7 +1530,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     describe("Input Validation", () => {
       test("should reject negative amounts", async () => {
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -1545,7 +1545,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should reject zero amount", async () => {
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -1560,7 +1560,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should reject excessively large amounts", async () => {
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -1575,7 +1575,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should reject non-numeric amount strings", async () => {
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -1590,7 +1590,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should handle missing required fields", async () => {
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             // Missing cardNumber and amount
@@ -1612,7 +1612,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
         console.log("\n🔄 Setting up refund security tests...");
         
         const res = await request(app)
-          .post("/api/public/charge")
+          .post("/api/v1/public/charge")
           .set("X-API-Key", apiKeyPlain)
           .send({
             cardNumber: customerCardNumber,
@@ -1634,7 +1634,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
         const fakeTransactionId = "507f1f77bcf86cd799439011";
         
         const res = await request(app)
-          .post("/api/public/refund")
+          .post("/api/v1/public/refund")
           .set("X-API-Key", apiKeyPlain)
           .send({
             transactionId: fakeTransactionId,
@@ -1648,7 +1648,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should reject refund with invalid transaction ID format", async () => {
         const res = await request(app)
-          .post("/api/public/refund")
+          .post("/api/v1/public/refund")
           .set("X-API-Key", apiKeyPlain)
           .send({
             transactionId: "invalid-id-format",
@@ -1668,7 +1668,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
         }
 
         const res = await request(app)
-          .post("/api/public/refund")
+          .post("/api/v1/public/refund")
           .set("X-API-Key", apiKeyPlain)
           .send({
             transactionId: chargeTransactionId,
@@ -1682,7 +1682,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should reject negative refund amount", async () => {
         const res = await request(app)
-          .post("/api/public/refund")
+          .post("/api/v1/public/refund")
           .set("X-API-Key", apiKeyPlain)
           .send({
             transactionId: chargeTransactionId || "507f1f77bcf86cd799439011",
@@ -1700,7 +1700,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     describe("Response Security Headers", () => {
       test("should include security headers in response", async () => {
         const res = await request(app)
-          .get("/api/public/verify")
+          .get("/api/v1/public/verify")
           .set("X-API-Key", apiKeyPlain);
 
         // Check for security headers (set by helmet)
@@ -1718,7 +1718,7 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
 
       test("should not expose server version information", async () => {
         const res = await request(app)
-          .get("/api/public/verify")
+          .get("/api/v1/public/verify")
           .set("X-API-Key", apiKeyPlain);
 
         // X-Powered-By should be removed or hidden
@@ -1779,3 +1779,4 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
     });
   });
 });
+

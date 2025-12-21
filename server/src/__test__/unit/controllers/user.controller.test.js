@@ -148,8 +148,11 @@ describe('User Controller - Unit Tests', () => {
         _id: 'user123',
         email: 'john@smu.edu.ph',
         role: 'user',
-        firstName: 'John',
-        lastName: 'Doe',
+        accountType: 'personal',
+        fullName: {
+          firstName: 'John',
+          lastName: 'Doe',
+        },
         comparePassword: jest.fn().mockResolvedValue(true),
       };
 
