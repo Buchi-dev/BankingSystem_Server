@@ -17,6 +17,9 @@ const v1Routes = require("./routes/v1");
 
 const { logger, limiter, speedLimiter, errorHandler, mongoSanitize, sanitize, dynamicCors } = require("./middlewares");
 
+// Import CRON manager for Render keep-alive
+const cronManager = require("./utils/cronManager");
+
 const app = express();
 
 // Trust proxy for production deployments (Vercel, Heroku, etc.)
@@ -59,6 +62,15 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// 7. CRON Status Endpoint
+app.get("/api/cron/status", (req, res) => {
+  res.status(200).json({
+    success: true,
+    cronStatus: cronManager.getStatus(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // 7. Root route (API info)
 app.get("/", (req, res) => {
   res.json({ 
@@ -67,17 +79,25 @@ app.get("/", (req, res) => {
     version: "2.0.0",
     apiVersion: "v1",
     environment: process.env.NODE_ENV || "development",
+    cronJobs: cronManager.getStatus(),
     endpoints: {
       users: "/api/v1/users",
       transactions: "/api/v1/transactions",
       business: "/api/v1/business",
       public: "/api/v1/public",
       health: "/api/health",
+      cronStatus: "/api/cron/status",
     },
   });
 });
 
-// 8. 404 Handler (for unmatched routes)
+// ============================================
+// 8. CRON JOBS INITIALIZATION
+// ============================================
+// Initialize CRON jobs for Render keep-alive (only in production)
+cronManager.init();
+
+// 9. 404 Handler (for unmatched routes)
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: "Route not found" });
 });
