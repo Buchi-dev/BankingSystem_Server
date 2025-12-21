@@ -1,6 +1,6 @@
 // middlewares/errorHandler.middleware.js
 
-const errorHandler = (err, res) => {
+const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
 
   // Mongoose validation error
