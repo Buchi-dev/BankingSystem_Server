@@ -75,7 +75,7 @@ const registerBusiness = async (req, res, next) => {
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role, accountType: user.accountType },
       process.env.JWT_SECRET,
-      { expiresIn: "2d" }
+      { expiresIn: process.env.JWT_EXPIRE || "7d" }
     );
 
     res.status(201).json({

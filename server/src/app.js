@@ -11,10 +11,8 @@ const express = require("express");
 const helmet = require("helmet");
 const hpp = require("hpp");
 
-const userRoutes = require("./routes/user.route");
-const transactionRoutes = require("./routes/transaction.route");
-const publicTransactionRoutes = require("./routes/public.transaction.route");
-const businessRoutes = require("./routes/business.route");
+// Import v1 routes (for API versioning)
+const v1Routes = require("./routes/v1");
 
 const { logger, limiter, speedLimiter, errorHandler, mongoSanitize, sanitize, dynamicCors } = require("./middlewares");
 
@@ -40,46 +38,46 @@ app.use(logger); // Log every request
 app.use("/api/", limiter, speedLimiter);
 
 // ============================================
-// 4. INTERNAL API ROUTES (JWT Authentication)
+// 5. API VERSION 1 ROUTES
 // ============================================
-app.use("/api/users", userRoutes);
-app.use("/api/transactions", transactionRoutes);
-app.use("/api/business", businessRoutes);
+// All routes are now under /api/v1/* for versioning
+app.use("/api/v1", v1Routes);
 
-// ============================================
-// 5. PUBLIC API ROUTES (API Key Authentication)
-// For external Smart City integrations
-// ============================================
-app.use("/api/public", publicTransactionRoutes);
+// 6. Health Check Endpoint (for production monitoring)
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
 
-// 6. Root route (API info)
+// 7. Root route (API info)
 app.get("/", (req, res) => {
   res.json({ 
     success: true, 
     message: "Smart City Banking API is running!",
     version: "2.0.0",
+    apiVersion: "v1",
+    environment: process.env.NODE_ENV || "development",
     endpoints: {
-      internal: {
-        users: "/api/users",
-        transactions: "/api/transactions",
-        business: "/api/business",
-      },
-      public: {
-        base: "/api/public",
-        charge: "/api/public/transactions/charge",
-        refund: "/api/public/transactions/refund",
-        verify: "/api/public/cards/verify",
-      },
+      users: "/api/v1/users",
+      transactions: "/api/v1/transactions",
+      business: "/api/v1/business",
+      public: "/api/v1/public",
+      health: "/api/health",
     },
   });
 });
 
-// 6. 404 Handler (for unmatched routes)
+// 8. 404 Handler (for unmatched routes)
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: "Route not found" });
 });
 
-// 7. Error Handler (must be last)
+// 9. Error Handler (must be last)
 app.use(errorHandler);
 
 module.exports = app;

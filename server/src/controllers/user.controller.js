@@ -42,7 +42,7 @@ const register = async (req, res, next) => {
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "2d" }
+      { expiresIn: process.env.JWT_EXPIRE || "7d" }
     );
 
     // Build response with virtual card info (shown only once at registration)
@@ -115,7 +115,7 @@ const login = async (req, res, next) => {
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: process.env.JWT_EXPIRE || "7d" }
     );
 
     res.status(200).json({
@@ -124,10 +124,11 @@ const login = async (req, res, next) => {
       data: {
         user: {
           id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          firstName: user.fullName.firstName,
+          lastName: user.fullName.lastName,
           email: user.email,
           role: user.role,
+          accountType: user.accountType,
         },
         token,
       },
