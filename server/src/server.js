@@ -13,6 +13,7 @@ require('dotenv').config();
 const app = require("./app");
 const connectDB = require("./configs/mongo.config");
 const Bank = require("./models/bank.model");
+const seedDefaultUsers = require("./utils/seedUsers");
 
 const PORT = process.env.PORT || 5000;
 
@@ -36,7 +37,10 @@ connectDB()
   .then(async () => {
     // Initialize bank on startup
     await initializeBank();
-    
+
+    // Seed default staff and admin users
+    await seedDefaultUsers();
+
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
