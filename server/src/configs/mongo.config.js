@@ -38,9 +38,7 @@ const connectDB = async () => {
     // Check multiple possible environment variable names for flexibility
     const mongoUri = process.env.MONGO_URI || 
                      process.env.MONGODB_URI || 
-                     process.env.DATABASE_URL || 
-                     'mongodb+srv://hedtjyuzon_db_user:3iTnNgJbnjPF27nv@cluster0.qidesdz.mongodb.net/BankingSystemDB?retryWrites=true&w=majority';
-    
+                     process.env.DATABASE_URL || '';
     const conn = await mongoose.connect(mongoUri);
     
     // Log successful connection with host information

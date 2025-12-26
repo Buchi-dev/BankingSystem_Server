@@ -10,58 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedManageUsersRouteImport } from './routes/_authenticated/manageUsers'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthRegisterRouteImport } from './routes/_auth/Register'
+import { Route as AuthLoginRouteImport } from './routes/_auth/Login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedManageUsersRoute =
-  AuthenticatedManageUsersRouteImport.update({
-    id: '/_authenticated/manageUsers',
-    path: '/manageUsers',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/_authenticated/dashboard',
-  path: '/dashboard',
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/_auth/Register',
+  path: '/Register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/_auth/Login',
+  path: '/Login',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/manageUsers': typeof AuthenticatedManageUsersRoute
+  '/Login': typeof AuthLoginRoute
+  '/Register': typeof AuthRegisterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/manageUsers': typeof AuthenticatedManageUsersRoute
+  '/Login': typeof AuthLoginRoute
+  '/Register': typeof AuthRegisterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/manageUsers': typeof AuthenticatedManageUsersRoute
+  '/_auth/Login': typeof AuthLoginRoute
+  '/_auth/Register': typeof AuthRegisterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/manageUsers'
+  fullPaths: '/' | '/Login' | '/Register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/manageUsers'
-  id:
-    | '__root__'
-    | '/'
-    | '/_authenticated/dashboard'
-    | '/_authenticated/manageUsers'
+  to: '/' | '/Login' | '/Register'
+  id: '__root__' | '/' | '/_auth/Login' | '/_auth/Register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedManageUsersRoute: typeof AuthenticatedManageUsersRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -73,18 +68,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/manageUsers': {
-      id: '/_authenticated/manageUsers'
-      path: '/manageUsers'
-      fullPath: '/manageUsers'
-      preLoaderRoute: typeof AuthenticatedManageUsersRouteImport
+    '/_auth/Register': {
+      id: '/_auth/Register'
+      path: '/Register'
+      fullPath: '/Register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+    '/_auth/Login': {
+      id: '/_auth/Login'
+      path: '/Login'
+      fullPath: '/Login'
+      preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -92,8 +87,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedManageUsersRoute: AuthenticatedManageUsersRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

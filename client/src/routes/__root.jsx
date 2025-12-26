@@ -1,21 +1,22 @@
-import { createRootRoute, Outlet, Link } from '@tanstack/react-router';
+import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 export const Route = createRootRoute({
-  component: () => (
-    <>
-      {/* GLOBAL LAYOUT (Navbar stays everywhere) */}
-      <div className="p-2 flex gap-2 border-b mb-4">
-        <Link to="/" className="[&.active]:font-bold">Home</Link>
-        <Link to="/dashboard" className="[&.active]:font-bold">Dashboard</Link>
-        <Link to="/manageUsers" className="[&.active]:font-bold">Manage Users</Link>
-      </div>
-      
-      {/* Page Content Renders Here */}
-      <Outlet />
-      
-      {/* Debug Tools (Bottom Right Corner) */}
-      <TanStackRouterDevtools />
-    </>
-  ),
+  component: RootComponent,
 });
+
+function RootComponent() {
+  return (
+    <>
+      {/* 1. THE PAGE CONTENT */}
+      {/* This renders whatever route matches (Login, Dashboard, etc.) */}
+      <div className="min-h-screen font-sans text-slate-900 bg-gray-50">
+        <Outlet />
+      </div>
+
+      {/* 2. GLOBAL DEBUGGER */}
+      {/* Only shows in development mode automatically */}
+      <TanStackRouterDevtools position="bottom-right" initialIsOpen={false} />
+    </>
+  );
+}
