@@ -43,19 +43,18 @@ export function LoginForm() {
       >
         {(field) => (
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label>
               Email Address
             </label>
             <input
               type="email"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="name@smu.edu.ph"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
             />
             {field.state.meta.errors ? (
-              <p className="mt-1 text-sm text-red-600">
+              <p>
                 {field.state.meta.errors.join(', ')}
               </p>
             ) : null}
@@ -72,18 +71,17 @@ export function LoginForm() {
       >
         {(field) => (
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label>
               Password
             </label>
             <input
               type="password"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
             />
             {field.state.meta.errors ? (
-              <p className="mt-1 text-sm text-red-600">
+              <p>
                 {field.state.meta.errors.join(', ')}
               </p>
             ) : null}
@@ -95,7 +93,6 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loginMutation.isPending}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
       </button>
