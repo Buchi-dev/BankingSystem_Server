@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminManageUsersRouteImport } from './routes/admin/ManageUsers'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/Register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/Login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminManageUsersRoute = AdminManageUsersRouteImport.update({
+  id: '/admin/ManageUsers',
+  path: '/admin/ManageUsers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -33,30 +39,39 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/Login': typeof AuthLoginRoute
   '/Register': typeof AuthRegisterRoute
+  '/admin/ManageUsers': typeof AdminManageUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/Login': typeof AuthLoginRoute
   '/Register': typeof AuthRegisterRoute
+  '/admin/ManageUsers': typeof AdminManageUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_auth/Login': typeof AuthLoginRoute
   '/_auth/Register': typeof AuthRegisterRoute
+  '/admin/ManageUsers': typeof AdminManageUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/Login' | '/Register'
+  fullPaths: '/' | '/Login' | '/Register' | '/admin/ManageUsers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/Login' | '/Register'
-  id: '__root__' | '/' | '/_auth/Login' | '/_auth/Register'
+  to: '/' | '/Login' | '/Register' | '/admin/ManageUsers'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth/Login'
+    | '/_auth/Register'
+    | '/admin/ManageUsers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AdminManageUsersRoute: typeof AdminManageUsersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +81,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/ManageUsers': {
+      id: '/admin/ManageUsers'
+      path: '/admin/ManageUsers'
+      fullPath: '/admin/ManageUsers'
+      preLoaderRoute: typeof AdminManageUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/Register': {
@@ -89,6 +111,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AdminManageUsersRoute: AdminManageUsersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
