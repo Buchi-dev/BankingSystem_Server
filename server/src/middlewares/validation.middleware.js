@@ -510,6 +510,70 @@ const validateBusinessRegistration = (req, res, next) => {
   next();
 };
 
+/**
+ * Validate employee registration
+ */
+const validateEmployeeRegistration = (req, res, next) => {
+  const {
+    fullName = {},
+    email,
+    password,
+    role,
+  } = req.body;
+
+  const { firstName, lastName, middleInitial } = fullName;
+
+  // Required fields
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "First name, last name, email, and password are required",
+    });
+  }
+
+  // Password strength
+  if (password.length < 10) {
+    return res.status(400).json({
+      success: false,
+      message: "Password must be at least 10 characters long",
+    });
+  }
+
+  // Name validation
+  const nameRegex = /^[A-Za-z ]+$/;
+  const initialRegex = /^[A-Za-z]+$/;
+
+  if (
+    !nameRegex.test(firstName) ||
+    !nameRegex.test(lastName) ||
+    (middleInitial && !initialRegex.test(middleInitial))
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Names must contain only letters",
+    });
+  }
+
+  // Email validation
+  const emailRegex = /^[\w.-]+@smu\.edu\.ph$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      message: "Only smu.edu.ph email addresses are allowed",
+    });
+  }
+
+  // Role validation
+  if (role && !["staff", "admin"].includes(role)) {
+    return res.status(400).json({
+      success: false,
+      message: "Role must be either 'staff' or 'admin'",
+    });
+  }
+
+  next();
+};
+
 
 module.exports = {
   validateUser,
@@ -520,4 +584,5 @@ module.exports = {
   validateCardCharge,
   validateRefund,
   validateBusinessRegistration,
+  validateEmployeeRegistration,
 };

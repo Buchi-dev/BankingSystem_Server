@@ -42,7 +42,6 @@ const register = async (req, res, next) => {
       fullName: { firstName, lastName, middleInitial },
       email,
       password,
-      role: "user", // SECURITY: Hardcoded - prevents mass assignment attack
       accountType: accountType || "personal",
     };
 

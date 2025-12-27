@@ -40,11 +40,6 @@ const UserSchema = new mongoose.Schema(
         uppercase: true,
       },
     },
-    role: { 
-      type: String, 
-      enum: ["user", "staff", "admin"], 
-      default: "user" 
-    },
 
     // Account type: personal for regular users, business for merchants/vendors
     accountType: {
@@ -215,54 +210,50 @@ UserSchema.index({ email: 1 });
 
 // Hash password before saving and generate virtual card
 UserSchema.pre("save", async function () {
-  try {
-    // Hash password if modified
-    if (this.isModified("password")) {
-      const salt = await bcrypt.genSalt(10);
-      this.password = await bcrypt.hash(this.password, salt);
-    }
-    
-    // Set wallet balance to 0 for non-user roles
-    if (this.role !== "user") {
-      this.wallet.balance = 0;
-    }
+  // Hash password if modified
+  if (this.isModified("password")) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
 
-    // Data pollution prevention: Clean up data based on account type
-    if (this.accountType === "personal") {
-      // Personal accounts should not have businessInfo
-      if (this.businessInfo && (this.businessInfo.businessName || this.businessInfo.businessType || this.businessInfo.websiteUrl)) {
-        this.businessInfo = undefined;
-      }
-    } else if (this.accountType === "business") {
-      // Business accounts should not have virtualCard
-      if (this.virtualCard && this.virtualCard.cardNumber) {
-        this.virtualCard = undefined;
-      }
+  // Set wallet balance to 0 for non-user roles
+  if (this.role !== "user") {
+    this.wallet.balance = 0;
+  }
+
+  // Data pollution prevention: Clean up data based on account type
+  if (this.accountType === "personal") {
+    // Personal accounts should not have businessInfo
+    if (this.businessInfo && (this.businessInfo.businessName || this.businessInfo.businessType || this.businessInfo.websiteUrl)) {
+      this.businessInfo = undefined;
     }
-
-    // Generate virtual card for new users (personal accounts only)
-    if (this.isNew && this.accountType === "personal" && !this.virtualCard?.cardNumber) {
-      const plainCVV = generateCVV();
-      const plainPIN = generatePIN();
-
-      this.virtualCard = {
-        cardNumber: generateCardNumber(),
-        cvv: await hashCVV(plainCVV),
-        pin: await hashPIN(plainPIN),
-        expiryDate: generateExpiryDate(),
-        isActive: true,
-        issuedAt: new Date(),
-        dailyLimit: 50000,
-        dailySpent: 0,
-        lastResetDate: new Date(),
-      };
-
-      // Store plain CVV and PIN temporarily for response (will be shown only once)
-      this._plainCVV = plainCVV;
-      this._plainPIN = plainPIN;
+  } else if (this.accountType === "business") {
+    // Business accounts should not have virtualCard
+    if (this.virtualCard && this.virtualCard.cardNumber) {
+      this.virtualCard = undefined;
     }
-  } catch (error) {
-    console.error(error);
+  }
+
+  // Generate virtual card for new users (personal accounts only)
+  if (this.isNew && this.accountType === "personal" && !this.virtualCard?.cardNumber) {
+    const plainCVV = generateCVV();
+    const plainPIN = generatePIN();
+
+    this.virtualCard = {
+      cardNumber: generateCardNumber(),
+      cvv: await hashCVV(plainCVV),
+      pin: await hashPIN(plainPIN),
+      expiryDate: generateExpiryDate(),
+      isActive: true,
+      issuedAt: new Date(),
+      dailyLimit: 50000,
+      dailySpent: 0,
+      lastResetDate: new Date(),
+    };
+
+    // Store plain CVV and PIN temporarily for response (will be shown only once)
+    this._plainCVV = plainCVV;
+    this._plainPIN = plainPIN;
   }
 });
 

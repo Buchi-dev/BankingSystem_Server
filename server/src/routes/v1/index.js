@@ -13,11 +13,13 @@ const userRoutes = require("../user.route");
 const transactionRoutes = require("../transaction.route");
 const businessRoutes = require("../business.route");
 const publicTransactionRoutes = require("../public.transaction.route");
+const employeeRoutes = require("../employee.route");
 
 // Mount routes
 router.use("/users", userRoutes);
 router.use("/transactions", transactionRoutes);
 router.use("/business", businessRoutes);
 router.use("/public", publicTransactionRoutes);
+router.use("/employees", employeeRoutes);
 
 module.exports = router;

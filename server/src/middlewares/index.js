@@ -1,7 +1,7 @@
 const auth = require('./auth.middleware');
 const errorHandler = require('./errorHandler.middleware');
 const logger = require('./loggers.middleware');
-const { limiter, speedLimiter, loginLimiter, cardVerifyLimiter} = require('./rateLimit.middleware');
+const { limiter, speedLimiter, loginLimiter, cardVerifyLimiter, employeeLoginLimiter} = require('./rateLimit.middleware');
 const checkRole = require('./role.middleware');
 const { 
   validateUser, 
@@ -12,6 +12,7 @@ const {
   validateCardCharge,
   validateRefund,
   validateBusinessRegistration,
+  validateEmployeeRegistration,
 } = require('./validation.middleware');
 const mongoSanitize = require('./mongoSanitize.middleware');
 const sanitize = require('./sanitize.middleware');
@@ -27,6 +28,7 @@ module.exports = {
   speedLimiter,
   loginLimiter,
   cardVerifyLimiter,
+  employeeLoginLimiter,
   checkRole,
   validateUser,
   validateRegistration,
@@ -37,6 +39,7 @@ module.exports = {
   validateCardCharge,
   validateRefund,
   validateBusinessRegistration,
+  validateEmployeeRegistration,
   apiAuth,
   requirePermission,
   checkTransactionLimit,
