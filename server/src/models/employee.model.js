@@ -48,7 +48,6 @@ const EmployeeSchema = new mongoose.Schema(
       select: false,
     },
 
-
     // Reference to the admin/staff who created this employee
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -61,6 +60,12 @@ const EmployeeSchema = new mongoose.Schema(
       type: String,
       enum: ["staff", "admin"],
       default: "staff",
+    },
+
+    // Verification status
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -76,11 +81,16 @@ EmployeeSchema.index({ role: 1 });
 // Pre-save middleware to hash password
 EmployeeSchema.pre("save", async function () {
   // Only hash the password if it has been modified (or is new)
-  if (!this.isModified("password")) return;
-
-  // Hash password with cost of 10
-  const saltRounds = 10;
-  this.password = await bcrypt.hash(this.password, saltRounds);
+  if (!this.isModified("password")) {
+    return;
+  }
+  try {
+    // Hash password with cost of 10
+    const saltRounds = 10;
+    this.password = await bcrypt.hash(this.password, saltRounds);
+  } catch (error) {
+    throw error;
+  }
 });
 
 // Instance method to compare password

@@ -73,6 +73,7 @@ const seedUsers = [
       balance: 0.00,
       currency: 'PHP'
     },
+    role: 'user'
   }
 ];
 
@@ -86,17 +87,19 @@ const seedEmployees = [
     },
     email: 'admin@smu.edu.ph',
     password: 'admin12345',
-    role: 'admin'
+    role: 'admin',
+    isVerified: true
   },
   {
     fullName: {
       firstName: 'Staff',
-      lastName: 'Member',
+      lastName: 'User',
       middleInitial: 'S'
     },
     email: 'staff@smu.edu.ph',
     password: 'staff12345',
-    role: 'staff'
+    role: 'staff',
+    isVerified: true
   },
   {
     fullName: {
@@ -105,8 +108,9 @@ const seedEmployees = [
       middleInitial: 'M'
     },
     email: 'manager1@smu.edu.ph',
-    password: 'manager123',
-    role: 'staff'
+    password: 'manager123456',
+    role: 'staff',
+    isVerified: true
   }
 ];
 
