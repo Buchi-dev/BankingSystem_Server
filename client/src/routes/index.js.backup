@@ -1,0 +1,1479 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
+import { AuthModal } from '../components/modals/AuthModal';
+
+export const Route = createFileRoute('/')({
+  component: Index,
+});
+
+function Index() {
+  const [scrollY, setScrollY] = useState(0);
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [activeApiTab, setActiveApiTab] = useState('payments');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [initialAuthTab, setInitialAuthTab] = useState('login');
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    
+    setTimeout(() => setStatsVisible(true), 500);
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const features = [
+    { icon: '💳', title: 'Virtual Card System', desc: 'Auto-generated 16-digit virtual cards with CVV and PIN for every user account' },
+    { icon: '🏢', title: 'Dual Account Types', desc: 'Personal accounts for students/staff and business accounts with API capabilities' },
+    { icon: '🔑', title: 'API Key Management', desc: 'Generate multiple API keys with custom permissions, rate limits, and CORS origins' },
+    { icon: '⚡', title: 'Real-Time Transactions', desc: 'Atomic balance updates with deposit, withdraw, transfer, payment, and refund support' },
+    { icon: '🔒', title: 'Enterprise Security', desc: 'JWT authentication, bcrypt hashing, rate limiting, and comprehensive security headers' },
+    { icon: '📊', title: 'Transaction Analytics', desc: 'Complete audit trails with balance snapshots and transaction history tracking' }
+  ];
+
+  const apiExamples = {
+    payments: `// Charge Customer Card
+POST /api/v1/public/transactions/charge
+Headers: X-API-Key: scb_live_your_api_key
+
+{
+  "cardNumber": "4532123456789012",
+  "cvv": "123",
+  "amount": 150.50,
+  "description": "Coffee and Pastry - Order #1234",
+  "externalReference": "ORDER-2025-1234"
+}
+
+// Response
+{
+  "success": true,
+  "message": "Payment processed successfully",
+  "data": {
+    "transaction": {
+      "reference": "TXN-2025-1234567890",
+      "type": "payment",
+      "amount": 150.50,
+      "status": "completed",
+      "createdAt": "2025-12-20T12:30:00.000Z"
+    }
+  }
+}`,
+    balance: `// Check Business Balance
+GET /api/v1/public/balance
+Headers: X-API-Key: scb_live_your_api_key
+
+// Response
+{
+  "success": true,
+  "data": {
+    "balance": "25430.50",
+    "currency": "PHP",
+    "lastTransaction": {
+      "amount": 150.50,
+      "type": "payment",
+      "timestamp": "2025-12-20T12:30:00.000Z"
+    }
+  }
+}`,
+    refund: `// Process Refund
+POST /api/v1/public/transactions/refund
+Headers: X-API-Key: scb_live_your_api_key
+
+{
+  "transactionId": "674a9012345678901234tx01",
+  "amount": 150.50,
+  "reason": "Customer requested refund"
+}
+
+// Response
+{
+  "success": true,
+  "message": "Refund processed successfully",
+  "data": {
+    "refund": {
+      "reference": "REF-2025-9876543210",
+      "type": "refund",
+      "amount": 150.50,
+      "status": "completed"
+    }
+  }
+}`
+  };
+
+  const useCases = [
+    {
+      icon: '👨‍🎓',
+      title: 'Student Accounts',
+      desc: 'Personal accounts with auto-generated virtual cards for students',
+      examples: ['Virtual card payments', 'Internal transfers', 'Deposit & withdraw', 'Transaction history']
+    },
+    {
+      icon: '🏪',
+      title: 'Business Merchants',
+      desc: 'Business accounts with API integration for accepting payments',
+      examples: ['API key management', 'Payment processing', 'Refund handling', 'Transaction analytics']
+    },
+    {
+      icon: '💳',
+      title: 'Virtual Card System',
+      desc: 'Automatic card generation with secure CVV and PIN management',
+      examples: ['16-digit card numbers', 'Daily spending limits', 'Card verification', 'Expiry management']
+    },
+    {
+      icon: '🔄',
+      title: 'Transaction Types',
+      desc: 'Comprehensive transaction processing for all banking operations',
+      examples: ['Deposits & withdrawals', 'User-to-user transfers', 'Business payments', 'Refunds']
+    },
+    {
+      icon: '🔐',
+      title: 'Security Features',
+      desc: 'Enterprise-grade security with multiple authentication methods',
+      examples: ['JWT authentication', 'API key security', 'Bcrypt hashing', 'Rate limiting']
+    },
+    {
+      icon: '📊',
+      title: 'Admin Dashboard',
+      desc: 'Complete system management with role-based access control',
+      examples: ['User management', 'Business verification', 'Bank status', 'Transaction monitoring']
+    }
+  ];
+
+  const integrationSteps = [
+    {
+      step: '01',
+      title: 'Register Account',
+      desc: 'Create a personal or business account with @smu.edu.ph email',
+      icon: '📝'
+    },
+    {
+      step: '02',
+      title: 'Get Virtual Card',
+      desc: 'Receive auto-generated virtual card with CVV and PIN (shown once)',
+      icon: '💳'
+    },
+    {
+      step: '03',
+      title: 'Business Verification',
+      desc: 'For businesses: Get admin verification to generate API keys',
+      icon: '✅'
+    },
+    {
+      step: '04',
+      title: 'Start Integrating',
+      desc: 'Use API keys to process payments, check balances, and manage transactions',
+      icon: '🚀'
+    }
+  ];
+
+  return (
+    <div style={{
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      color: '#1a202c',
+      overflow: 'hidden'
+    }}>
+      {/* Navigation Bar */}
+      <nav style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '70px',
+        background: scrollY > 50 ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+        backdropFilter: scrollY > 50 ? 'blur(10px)' : 'none',
+        boxShadow: scrollY > 50 ? '0 2px 20px rgba(0, 0, 0, 0.1)' : 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 5%',
+        zIndex: 1000,
+        transition: 'all 0.3s ease'
+      }}>
+        <div style={{
+          fontSize: '24px',
+          fontWeight: '700',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          🏦 Smart City Bank API
+        </div>
+        
+        <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+          <a href="#features" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500', transition: 'color 0.3s' }}
+             onMouseEnter={(e) => e.target.style.color = '#667eea'}
+             onMouseLeave={(e) => e.target.style.color = '#4a5568'}>
+            Features
+          </a>
+          <a href="#api" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500', transition: 'color 0.3s' }}
+             onMouseEnter={(e) => e.target.style.color = '#667eea'}
+             onMouseLeave={(e) => e.target.style.color = '#4a5568'}>
+            API Docs
+          </a>
+          <a href="#use-cases" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500', transition: 'color 0.3s' }}
+             onMouseEnter={(e) => e.target.style.color = '#667eea'}
+             onMouseLeave={(e) => e.target.style.color = '#4a5568'}>
+            Use Cases
+          </a>
+          <a href="#integration" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500', transition: 'color 0.3s' }}
+             onMouseEnter={(e) => e.target.style.color = '#667eea'}
+             onMouseLeave={(e) => e.target.style.color = '#4a5568'}>
+            Integration
+          </a>
+          <button style={{
+            padding: '10px 24px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '25px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+            transition: 'all 0.3s ease'
+          }}
+          onClick={() => { setShowAuthModal(true); setInitialAuthTab('login'); }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+          }}>
+            Login
+          </button>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        padding: '0 5%'
+      }}>
+        {/* Animated Background Elements */}
+        <div style={{
+          position: 'absolute',
+          width: '500px',
+          height: '500px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '50%',
+          top: '-200px',
+          right: '-200px',
+          animation: 'float 6s ease-in-out infinite'
+        }}></div>
+        <div style={{
+          position: 'absolute',
+          width: '300px',
+          height: '300px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '50%',
+          bottom: '-100px',
+          left: '-100px',
+          animation: 'float 8s ease-in-out infinite'
+        }}></div>
+
+        {/* Hero Content */}
+        <div style={{
+          maxWidth: '1200px',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '60px',
+          alignItems: 'center',
+          zIndex: 1
+        }}>
+          <div>
+            <div style={{
+              display: 'inline-block',
+              padding: '8px 20px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '20px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#ffffff',
+              marginBottom: '24px',
+              animation: 'slideInLeft 1s ease-out'
+            }}>
+              🏦 Smart City Banking System
+            </div>
+            <h1 style={{
+              fontSize: '56px',
+              fontWeight: '800',
+              color: '#ffffff',
+              margin: '0 0 24px 0',
+              lineHeight: '1.2',
+              animation: 'slideInLeft 1s ease-out 0.1s backwards'
+            }}>
+              Virtual Banking API for Smart City Development
+            </h1>
+            <p style={{
+              fontSize: '22px',
+              color: 'rgba(255, 255, 255, 0.95)',
+              margin: '0 0 20px 0',
+              fontWeight: '400',
+              animation: 'slideInLeft 1s ease-out 0.2s backwards'
+            }}>
+              Complete banking infrastructure with virtual cards, dual account types, and secure API integration for SMU students, staff, and businesses.
+            </p>
+            <p style={{
+              fontSize: '18px',
+              color: 'rgba(255, 255, 255, 0.85)',
+              margin: '0 0 48px 0',
+              lineHeight: '1.7',
+              animation: 'slideInLeft 1s ease-out 0.3s backwards'
+            }}>
+              Process payments, manage transactions, and integrate with external systems. Features automatic virtual card generation, business verification, API key management, and comprehensive security measures. Perfect for university projects, hackathons, and smart city prototypes.
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '20px',
+              animation: 'slideInLeft 1s ease-out 0.4s backwards'
+            }}>
+              <button style={{
+                padding: '16px 40px',
+                background: '#ffffff',
+                color: '#667eea',
+                border: 'none',
+                borderRadius: '30px',
+                fontSize: '18px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-3px)';
+                e.target.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.3)';
+              }}>
+                View Documentation
+              </button>
+              <button style={{
+                padding: '16px 40px',
+                background: 'transparent',
+                color: '#ffffff',
+                border: '2px solid #ffffff',
+                borderRadius: '30px',
+                fontSize: '18px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+                e.target.style.transform = 'translateY(-3px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'transparent';
+                e.target.style.transform = 'translateY(0)';
+              }}>
+                Try Sandbox
+              </button>
+            </div>
+          </div>
+
+          {/* API Preview Card */}
+          <div style={{
+            background: 'rgba(26, 32, 44, 0.9)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px',
+            padding: '30px',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            animation: 'slideInRight 1s ease-out',
+            fontFamily: 'monospace'
+          }}>
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              marginBottom: '20px'
+            }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f56' }}></div>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }}></div>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27c93f' }}></div>
+            </div>
+            <pre style={{
+              color: '#a0aec0',
+              fontSize: '13px',
+              lineHeight: '1.8',
+              margin: 0,
+              overflow: 'auto'
+            }}>
+              <span style={{ color: '#68d391' }}>POST</span> <span style={{ color: '#90cdf4' }}>/api/v1/public/transactions/charge</span>{'\n'}
+              <span style={{ color: '#a0aec0' }}>Headers: X-API-Key: scb_live_...</span>{'\n\n'}
+              {'{'}{'\n'}
+              {'  '}<span style={{ color: '#fc8181' }}>"cardNumber"</span>: <span style={{ color: '#fbd38d' }}>"4532123456789012"</span>,{'\n'}
+              {'  '}<span style={{ color: '#fc8181' }}>"cvv"</span>: <span style={{ color: '#fbd38d' }}>"123"</span>,{'\n'}
+              {'  '}<span style={{ color: '#fc8181' }}>"amount"</span>: <span style={{ color: '#b794f4' }}>150.50</span>{'\n'}
+              {'}'}{'\n\n'}
+              <span style={{ color: '#68d391' }}>→ Response: 200 OK</span>{'\n'}
+              <span style={{ color: '#90cdf4' }}>"status"</span>: <span style={{ color: '#fbd38d' }}>"completed"</span> ✓
+            </pre>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div style={{
+          position: 'absolute',
+          bottom: '40px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          animation: 'bounce 2s infinite'
+        }}>
+          <div style={{
+            width: '30px',
+            height: '50px',
+            border: '2px solid rgba(255, 255, 255, 0.5)',
+            borderRadius: '25px',
+            display: 'flex',
+            justifyContent: 'center',
+            paddingTop: '8px'
+          }}>
+            <div style={{
+              width: '4px',
+              height: '8px',
+              background: 'rgba(255, 255, 255, 0.8)',
+              borderRadius: '2px'
+            }}></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section style={{
+        padding: '80px 5%',
+        background: '#f7fafc'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '40px'
+        }}>
+          {[
+            { number: 'PHP', label: 'Currency', icon: '💱' },
+            { number: '₱50K', label: 'Daily Limit', icon: '💳' },
+            { number: '3 Years', label: 'Card Validity', icon: '📅' },
+            { number: '100/min', label: 'Rate Limit', icon: '⚡' }
+          ].map((stat, index) => (
+            <div key={index} style={{
+              background: '#ffffff',
+              padding: '40px 30px',
+              borderRadius: '20px',
+              textAlign: 'center',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+              transform: statsVisible ? 'translateY(0)' : 'translateY(50px)',
+              opacity: statsVisible ? 1 : 0,
+              transition: `all 0.6s ease ${index * 0.1}s`,
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-10px)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
+            }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>{stat.icon}</div>
+              <div style={{ fontSize: '40px', fontWeight: '800', color: '#667eea', marginBottom: '8px' }}>
+                {stat.number}
+              </div>
+              <div style={{ fontSize: '16px', color: '#718096', fontWeight: '500' }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" style={{
+        padding: '100px 5%',
+        background: '#ffffff'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{
+            fontSize: '48px',
+            fontWeight: '800',
+            textAlign: 'center',
+            marginBottom: '16px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Powerful Features for Developers
+          </h2>
+          <p style={{
+            fontSize: '18px',
+            color: '#718096',
+            textAlign: 'center',
+            marginBottom: '60px',
+            maxWidth: '700px',
+            margin: '0 auto 60px'
+          }}>
+            Complete banking infrastructure with virtual cards, secure API integration, and comprehensive transaction management for SMU community
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '30px'
+          }}>
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                onClick={() => setActiveFeature(index)}
+                style={{
+                  background: activeFeature === index 
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                    : '#f7fafc',
+                  padding: '40px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  transition: 'all 0.4s ease',
+                  transform: activeFeature === index ? 'scale(1.05)' : 'scale(1)',
+                  boxShadow: activeFeature === index 
+                    ? '0 20px 40px rgba(102, 126, 234, 0.4)' 
+                    : '0 5px 15px rgba(0, 0, 0, 0.08)'
+                }}
+                onMouseEnter={(e) => {
+                  if (activeFeature !== index) {
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.12)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeFeature !== index) {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.08)';
+                  }
+                }}
+              >
+                <div style={{
+                  fontSize: '48px',
+                  marginBottom: '20px'
+                }}>
+                  {feature.icon}
+                </div>
+                <h3 style={{
+                  fontSize: '22px',
+                  fontWeight: '700',
+                  marginBottom: '12px',
+                  color: activeFeature === index ? '#ffffff' : '#2d3748'
+                }}>
+                  {feature.title}
+                </h3>
+                <p style={{
+                  fontSize: '15px',
+                  lineHeight: '1.6',
+                  color: activeFeature === index ? 'rgba(255, 255, 255, 0.9)' : '#718096'
+                }}>
+                  {feature.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Account Types Section */}
+      <section style={{
+        padding: '100px 5%',
+        background: 'linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{
+            fontSize: '48px',
+            fontWeight: '800',
+            textAlign: 'center',
+            marginBottom: '16px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Two Account Types, One Platform
+          </h2>
+          <p style={{
+            fontSize: '18px',
+            color: '#718096',
+            textAlign: 'center',
+            marginBottom: '60px',
+            maxWidth: '700px',
+            margin: '0 auto 60px'
+          }}>
+            Choose the account type that fits your needs. Both include automatic virtual card generation.
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '40px',
+            marginBottom: '60px'
+          }}>
+            {/* Personal Account */}
+            <div style={{
+              background: '#ffffff',
+              padding: '50px',
+              borderRadius: '20px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-10px)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
+            }}>
+              <div style={{ fontSize: '64px', marginBottom: '24px', textAlign: 'center' }}>👤</div>
+              <h3 style={{
+                fontSize: '28px',
+                fontWeight: '700',
+                marginBottom: '16px',
+                color: '#2d3748',
+                textAlign: 'center'
+              }}>
+                Personal Account
+              </h3>
+              <p style={{
+                fontSize: '16px',
+                color: '#718096',
+                marginBottom: '30px',
+                textAlign: 'center',
+                lineHeight: '1.6'
+              }}>
+                Perfect for students and staff. Get instant access to virtual banking features.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {[
+                  'Auto-generated virtual card (16-digit)',
+                  'CVV and PIN (shown once at registration)',
+                  'Daily spending limit: ₱50,000',
+                  'Internal transfers between users',
+                  'Deposit from bank & withdraw to bank',
+                  'Complete transaction history',
+                  'Wallet balance management'
+                ].map((feature, i) => (
+                  <div key={i} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px',
+                    background: '#f7fafc',
+                    borderRadius: '10px'
+                  }}>
+                    <span style={{ color: '#667eea', fontSize: '20px' }}>✓</span>
+                    <span style={{ color: '#4a5568', fontSize: '15px' }}>{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Business Account */}
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: '50px',
+              borderRadius: '20px',
+              boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-10px)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.3)';
+            }}>
+              <div style={{ fontSize: '64px', marginBottom: '24px', textAlign: 'center' }}>🏢</div>
+              <h3 style={{
+                fontSize: '28px',
+                fontWeight: '700',
+                marginBottom: '16px',
+                color: '#ffffff',
+                textAlign: 'center'
+              }}>
+                Business Account
+              </h3>
+              <p style={{
+                fontSize: '16px',
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '30px',
+                textAlign: 'center',
+                lineHeight: '1.6'
+              }}>
+                All personal features plus API integration for merchants and vendors.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {[
+                  'Everything in Personal Account',
+                  'API key generation & management',
+                  'Accept payments from customers',
+                  'Process refunds (full or partial)',
+                  'Custom rate limits per API key',
+                  'CORS origin whitelisting',
+                  'Business verification system',
+                  'Transaction analytics & reporting'
+                ].map((feature, i) => (
+                  <div key={i} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px',
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    borderRadius: '10px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <span style={{ color: '#ffffff', fontSize: '20px' }}>✓</span>
+                    <span style={{ color: '#ffffff', fontSize: '15px' }}>{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Virtual Card Info */}
+          <div style={{
+            background: '#ffffff',
+            padding: '40px',
+            borderRadius: '20px',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+            marginTop: '40px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              marginBottom: '30px'
+            }}>
+              <div style={{ fontSize: '56px' }}>💳</div>
+              <div>
+                <h3 style={{
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  marginBottom: '8px',
+                  color: '#2d3748'
+                }}>
+                  Automatic Virtual Card Generation
+                </h3>
+                <p style={{
+                  fontSize: '16px',
+                  color: '#718096',
+                  lineHeight: '1.6'
+                }}>
+                  Every account receives a virtual card automatically upon registration
+                </p>
+              </div>
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '24px'
+            }}>
+              {[
+                { icon: '🔢', title: '16-Digit Card', desc: '4532 prefix (Visa-like format)' },
+                { icon: '🔐', title: 'Secure Credentials', desc: 'CVV & PIN hashed with bcrypt' },
+                { icon: '📅', title: '3-Year Validity', desc: 'Auto-expiry after 3 years' },
+                { icon: '💰', title: 'Daily Limits', desc: '₱50,000 default, resets at midnight' },
+                { icon: '👁️', title: 'One-Time Display', desc: 'CVV & PIN shown only at registration' },
+                { icon: '✅', title: 'Active Status', desc: 'Can be activated/deactivated anytime' }
+              ].map((item, i) => (
+                <div key={i} style={{
+                  padding: '20px',
+                  background: '#f7fafc',
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</div>
+                  <h4 style={{
+                    fontSize: '16px',
+                    fontWeight: '700',
+                    marginBottom: '8px',
+                    color: '#2d3748'
+                  }}>
+                    {item.title}
+                  </h4>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#718096',
+                    lineHeight: '1.5'
+                  }}>
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* API Documentation Section */}
+      <section id="api" style={{
+        padding: '100px 5%',
+        background: '#1a202c'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{
+            fontSize: '48px',
+            fontWeight: '800',
+            textAlign: 'center',
+            marginBottom: '16px',
+            color: '#ffffff'
+          }}>
+            Simple & Powerful APIs
+          </h2>
+          <p style={{
+            fontSize: '18px',
+            color: '#a0aec0',
+            textAlign: 'center',
+            marginBottom: '60px',
+            maxWidth: '700px',
+            margin: '0 auto 60px'
+          }}>
+            RESTful APIs with comprehensive documentation and code examples in multiple languages
+          </p>
+
+          {/* API Tabs */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            marginBottom: '40px'
+          }}>
+            {[
+              { key: 'payments', label: 'Charge Card' },
+              { key: 'balance', label: 'Check Balance' },
+              { key: 'refund', label: 'Process Refund' }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveApiTab(tab.key)}
+                style={{
+                  padding: '12px 32px',
+                  background: activeApiTab === tab.key 
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                    : 'transparent',
+                  color: activeApiTab === tab.key ? '#ffffff' : '#a0aec0',
+                  border: activeApiTab === tab.key ? 'none' : '2px solid #4a5568',
+                  borderRadius: '25px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (activeApiTab !== tab.key) {
+                    e.target.style.borderColor = '#667eea';
+                    e.target.style.color = '#667eea';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeApiTab !== tab.key) {
+                    e.target.style.borderColor = '#4a5568';
+                    e.target.style.color = '#a0aec0';
+                  }
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* API Code Display */}
+          <div style={{
+            background: '#2d3748',
+            borderRadius: '20px',
+            padding: '40px',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+            fontFamily: 'monospace'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '24px'
+            }}>
+              <div style={{
+                display: 'flex',
+                gap: '8px'
+              }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f56' }}></div>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }}></div>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27c93f' }}></div>
+              </div>
+              <button style={{
+                padding: '8px 20px',
+                background: '#667eea',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.background = '#764ba2'}
+              onMouseLeave={(e) => e.target.style.background = '#667eea'}>
+                📋 Copy Code
+              </button>
+            </div>
+            <pre style={{
+              color: '#e2e8f0',
+              fontSize: '14px',
+              lineHeight: '1.8',
+              margin: 0,
+              overflow: 'auto',
+              whiteSpace: 'pre-wrap'
+            }}>
+              {apiExamples[activeApiTab]}
+            </pre>
+          </div>
+        </div>
+      </section>
+
+      {/* Use Cases Section */}
+      <section id="use-cases" style={{
+        padding: '100px 5%',
+        background: '#f7fafc'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{
+            fontSize: '48px',
+            fontWeight: '800',
+            textAlign: 'center',
+            marginBottom: '16px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Smart City Use Cases
+          </h2>
+          <p style={{
+            fontSize: '18px',
+            color: '#718096',
+            textAlign: 'center',
+            marginBottom: '60px',
+            maxWidth: '800px',
+            margin: '0 auto 60px'
+          }}>
+            Perfect for SMU students, staff, and businesses. Process payments, manage virtual cards, and integrate with external systems through our secure API.
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '30px'
+          }}>
+            {useCases.map((useCase, index) => (
+              <div
+                key={index}
+                style={{
+                  background: '#ffffff',
+                  padding: '40px',
+                  borderRadius: '20px',
+                  boxShadow: '0 5px 15px rgba(0, 0, 0, 0.08)',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-10px)';
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.08)';
+                }}
+              >
+                <div style={{ fontSize: '56px', marginBottom: '20px' }}>
+                  {useCase.icon}
+                </div>
+                <h3 style={{
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  marginBottom: '12px',
+                  color: '#2d3748'
+                }}>
+                  {useCase.title}
+                </h3>
+                <p style={{
+                  fontSize: '15px',
+                  lineHeight: '1.6',
+                  color: '#718096',
+                  marginBottom: '20px'
+                }}>
+                  {useCase.desc}
+                </p>
+                <div style={{
+                  borderTop: '1px solid #e2e8f0',
+                  paddingTop: '20px'
+                }}>
+                  {useCase.examples.map((example, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        padding: '8px 0',
+                        color: '#4a5568',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <span style={{ color: '#667eea' }}>✓</span> {example}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Integration Steps */}
+      <section id="integration" style={{
+        padding: '100px 5%',
+        background: '#ffffff'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{
+            fontSize: '48px',
+            fontWeight: '800',
+            textAlign: 'center',
+            marginBottom: '16px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Get Started in Minutes
+          </h2>
+          <p style={{
+            fontSize: '18px',
+            color: '#718096',
+            textAlign: 'center',
+            marginBottom: '60px',
+            maxWidth: '600px',
+            margin: '0 auto 60px'
+          }}>
+            Four simple steps to get started with the Smart City Banking System
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '30px',
+            position: 'relative'
+          }}>
+            {/* Connection Line */}
+            <div style={{
+              position: 'absolute',
+              top: '60px',
+              left: '12.5%',
+              right: '12.5%',
+              height: '2px',
+              background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+              zIndex: 0
+            }}></div>
+
+            {integrationSteps.map((step, index) => (
+              <div
+                key={index}
+                style={{
+                  textAlign: 'center',
+                  position: 'relative',
+                  zIndex: 1
+                }}
+              >
+                <div style={{
+                  width: '120px',
+                  height: '120px',
+                  margin: '0 auto 24px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '48px',
+                  boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)';
+                  e.currentTarget.style.boxShadow = '0 15px 40px rgba(102, 126, 234, 0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.4)';
+                }}>
+                  {step.icon}
+                </div>
+                <div style={{
+                  fontSize: '32px',
+                  fontWeight: '800',
+                  color: '#667eea',
+                  marginBottom: '12px'
+                }}>
+                  {step.step}
+                </div>
+                <h3 style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  marginBottom: '8px',
+                  color: '#2d3748'
+                }}>
+                  {step.title}
+                </h3>
+                <p style={{
+                  fontSize: '14px',
+                  color: '#718096',
+                  lineHeight: '1.6'
+                }}>
+                  {step.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Technical Specs Section */}
+      <section style={{
+        padding: '100px 5%',
+        background: '#f7fafc'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{
+            fontSize: '48px',
+            fontWeight: '800',
+            textAlign: 'center',
+            marginBottom: '60px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Technical Specifications
+          </h2>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '40px'
+          }}>
+            {/* API Features */}
+            <div style={{
+              background: '#ffffff',
+              padding: '40px',
+              borderRadius: '20px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
+            }}>
+              <h3 style={{
+                fontSize: '24px',
+                fontWeight: '700',
+                marginBottom: '24px',
+                color: '#2d3748',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <span style={{ fontSize: '32px' }}>⚙️</span>
+                API Features
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {[
+                  'RESTful API architecture',
+                  'JSON request/response format',
+                  'JWT & API key authentication',
+                  'Rate limiting: 60 req/min (configurable)',
+                  'CORS origin whitelisting',
+                  'Real-time transaction processing',
+                  'Comprehensive error handling',
+                  'API versioning (v2.0.0)'
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px',
+                    background: '#f7fafc',
+                    borderRadius: '10px',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#e6f2ff';
+                    e.currentTarget.style.transform = 'translateX(5px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f7fafc';
+                    e.currentTarget.style.transform = 'translateX(0)';
+                  }}>
+                    <span style={{ color: '#667eea', fontSize: '18px', fontWeight: '700' }}>✓</span>
+                    <span style={{ color: '#4a5568', fontSize: '15px' }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Supported Operations */}
+            <div style={{
+              background: '#ffffff',
+              padding: '40px',
+              borderRadius: '20px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
+            }}>
+              <h3 style={{
+                fontSize: '24px',
+                fontWeight: '700',
+                marginBottom: '24px',
+                color: '#2d3748',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <span style={{ fontSize: '32px' }}>🔧</span>
+                Supported Operations
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {[
+                  'Virtual card payment processing',
+                  'Balance inquiries & wallet management',
+                  'Complete transaction history',
+                  'Business API key management',
+                  'PHP currency (Philippine Peso)',
+                  'Full & partial refund processing',
+                  'Deposit & withdrawal operations',
+                  'User-to-user transfer system'
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px',
+                    background: '#f7fafc',
+                    borderRadius: '10px',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#e6f2ff';
+                    e.currentTarget.style.transform = 'translateX(5px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f7fafc';
+                    e.currentTarget.style.transform = 'translateX(0)';
+                  }}>
+                    <span style={{ color: '#764ba2', fontSize: '18px', fontWeight: '700' }}>→</span>
+                    <span style={{ color: '#4a5568', fontSize: '15px' }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section style={{
+        padding: '100px 5%',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <h2 style={{
+            fontSize: '48px',
+            fontWeight: '800',
+            color: '#ffffff',
+            marginBottom: '24px'
+          }}>
+            Ready to Start Banking with Smart City?
+          </h2>
+          <p style={{
+            fontSize: '20px',
+            color: 'rgba(255, 255, 255, 0.9)',
+            marginBottom: '40px',
+            lineHeight: '1.6'
+          }}>
+            Register with your @smu.edu.ph email to get instant access. Personal accounts receive virtual cards automatically, and businesses can integrate via API after verification.
+          </p>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            flexWrap: 'wrap'
+          }}>
+            <button style={{
+              padding: '18px 48px',
+              background: '#ffffff',
+              color: '#667eea',
+              border: 'none',
+              borderRadius: '30px',
+              fontSize: '20px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => { setShowAuthModal(true); setInitialAuthTab('register'); }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-5px) scale(1.05)';
+              e.target.style.boxShadow = '0 15px 50px rgba(0, 0, 0, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0) scale(1)';
+              e.target.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.3)';
+            }}>
+              Register Now →
+            </button>
+            <button style={{
+              padding: '18px 48px',
+              background: 'transparent',
+              color: '#ffffff',
+              border: '2px solid #ffffff',
+              borderRadius: '30px',
+              fontSize: '20px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+              e.target.style.transform = 'translateY(-5px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'transparent';
+              e.target.style.transform = 'translateY(0)';
+            }}>
+              View Documentation
+            </button>
+          </div>
+          <p style={{
+            marginTop: '32px',
+            fontSize: '16px',
+            color: 'rgba(255, 255, 255, 0.8)'
+          }}>
+            💡 Perfect for SMU students, hackathons, university projects, and smart city development
+          </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer style={{
+        background: '#1a202c',
+        color: '#ffffff',
+        padding: '60px 5% 30px'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '40px',
+          marginBottom: '40px'
+        }}>
+          <div>
+            <div style={{
+              fontSize: '24px',
+              fontWeight: '700',
+              marginBottom: '16px'
+            }}>
+              🏦 Smart City Bank API
+            </div>
+            <p style={{ color: '#a0aec0', fontSize: '14px', lineHeight: '1.6' }}>
+              Complete virtual banking system with virtual cards, dual account types, and secure API integration for SMU community.
+            </p>
+          </div>
+          <div>
+            <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: '#ffffff' }}>
+              Product
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {['Features', 'API Docs', 'Sandbox', 'Pricing'].map((item, i) => (
+                <a key={i} href="#" style={{ color: '#a0aec0', textDecoration: 'none', fontSize: '14px', transition: 'color 0.3s' }}
+                   onMouseEnter={(e) => e.target.style.color = '#667eea'}
+                   onMouseLeave={(e) => e.target.style.color = '#a0aec0'}>
+                  {item}
+                </a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: '#ffffff' }}>
+              Resources
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {['Documentation', 'Guides', 'Code Examples', 'Support'].map((item, i) => (
+                <a key={i} href="#" style={{ color: '#a0aec0', textDecoration: 'none', fontSize: '14px', transition: 'color 0.3s' }}
+                   onMouseEnter={(e) => e.target.style.color = '#667eea'}
+                   onMouseLeave={(e) => e.target.style.color = '#a0aec0'}>
+                  {item}
+                </a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: '#ffffff' }}>
+              Connect
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {['GitHub', 'Discord', 'Twitter', 'Contact'].map((item, i) => (
+                <a key={i} href="#" style={{ color: '#a0aec0', textDecoration: 'none', fontSize: '14px', transition: 'color 0.3s' }}
+                   onMouseEnter={(e) => e.target.style.color = '#667eea'}
+                   onMouseLeave={(e) => e.target.style.color = '#a0aec0'}>
+                  {item}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          paddingTop: '24px',
+          textAlign: 'center',
+          color: '#718096',
+          fontSize: '14px'
+        }}>
+          © 2025 Smart City Banking System. Virtual banking infrastructure for SMU students, staff, and businesses. Requires @smu.edu.ph email.
+        </div>
+      </footer>
+
+      <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} initialTab={initialAuthTab} />
+      {/* Inline Keyframe Animations */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        @keyframes bounce {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(-10px); }
+        }
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-50px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+          from { opacity: 0; transform: translateX(50px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+      `}} />
+    </div>
+  );
+}

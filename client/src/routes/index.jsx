@@ -1,4 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { LoginForm } from '../components/forms/LoginForm'
+import { RegisterForm } from '../components/forms/RegisterForm'
+
+
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -6,9 +10,9 @@ export const Route = createFileRoute('/')({
 
 function Index() {
   return (
-    <div className="p-2">
-      <h3>Welcome to Smart City Bank</h3>
-      <p>Secure, Fast, Connected.</p>
+    <div>
+      <LoginForm />
+      <RegisterForm />
     </div>
   );
 }

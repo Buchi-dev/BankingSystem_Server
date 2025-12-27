@@ -217,7 +217,9 @@ const validateCardFormat = (cardNumber) => {
     return { isValid: false, error: "Card number is required" };
   }
 
-  const cleaned = cardNumber.replace(/\D/g, "");
+  // Ensure cardNumber is a string
+  const cardNumberString = String(cardNumber);
+  const cleaned = cardNumberString.replace(/\D/g, "");
 
   if (cleaned.length !== 16) {
     return { isValid: false, error: "Card number must be 16 digits" };

@@ -1,101 +1,51 @@
-import { useForm } from '@tanstack/react-form';
-import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import { userApi } from '../../api/user'; // Ensure this path is correct
+import React from 'react'
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Flex, Form, Input } from 'antd';
+
+const onFinish = values => {
+  console.log('Success:', values);
+};
+
+const onFinishFailed = errorInfo => {
+  console.log('Failed:', errorInfo);
+};
 
 export function LoginForm() {
-  const navigate = useNavigate();
-
-  const loginMutation = useMutation({
-    mutationFn: userApi.login,
-    onSuccess: (data) => {
-      localStorage.setItem('token', data.token);
-      navigate({ to: '/dashboard' });
-    },
-    onError: (err) => alert(`Login Failed: ${err.message}`),
-  });
-
-  const form = useForm({
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-    onSubmit: async ({ value }) => {
-      await loginMutation.mutateAsync(value);
-    },
-  });
-
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        form.handleSubmit();
-      }}
-      className="space-y-6"
+    <Form
+      name="login"
+      initialValues={{ remember: true }}
+      style={{ maxWidth: 360 }}
+      onFinish={onFinish}
     >
-      {/* EMAIL FIELD */}
-      <form.Field
-        name="email"
-        validators={{
-          onChange: ({ value }) => !value ? 'Email is required' : undefined,
-        }}
+      <Form.Item
+        name="username"
+        rules={[{ required: true, message: 'Please input your Username!' }]}
       >
-        {(field) => (
-          <div>
-            <label>
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="name@smu.edu.ph"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-            />
-            {field.state.meta.errors ? (
-              <p>
-                {field.state.meta.errors.join(', ')}
-              </p>
-            ) : null}
-          </div>
-        )}
-      </form.Field>
-
-      {/* PASSWORD FIELD */}
-      <form.Field
+        <Input prefix={<UserOutlined />} placeholder="Username" />
+      </Form.Item>
+      <Form.Item
         name="password"
-        validators={{
-          onChange: ({ value }) => !value ? 'Password is required' : undefined,
-        }}
+        rules={[{ required: true, message: 'Please input your Password!' }]}
       >
-        {(field) => (
-          <div>
-            <label>
-              Password
-            </label>
-            <input
-              type="password"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-            />
-            {field.state.meta.errors ? (
-              <p>
-                {field.state.meta.errors.join(', ')}
-              </p>
-            ) : null}
-          </div>
-        )}
-      </form.Field>
+        <Input prefix={<LockOutlined />} type="password" placeholder="Password" />
+      </Form.Item>
+      <Form.Item>
+        <Flex justify="space-between" align="center">
+          <Form.Item name="remember" valuePropName="checked" noStyle>
+            <Checkbox>Remember me</Checkbox>
+          </Form.Item>
+          <a href="">Forgot password</a>
+        </Flex>
+      </Form.Item>
 
-      {/* SUBMIT BUTTON */}
-      <button
-        type="submit"
-        disabled={loginMutation.isPending}
-      >
-        {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
-      </button>
-    </form>
-  );
+      <Form.Item>
+        <Button block type="primary" htmlType="submit">
+          Log in
+        </Button>
+        or <a href="">Register now!</a>
+      </Form.Item>
+    </Form>
+  )
 }
+

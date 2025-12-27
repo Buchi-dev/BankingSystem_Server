@@ -10,10 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tanstack/react-form": "^1.27.6",
     "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-router": "^1.143.11",
-    "@tanstack/react-table": "^8.21.3",
+    "antd": "^6.1.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-loading-indicators": "^1.0.1",

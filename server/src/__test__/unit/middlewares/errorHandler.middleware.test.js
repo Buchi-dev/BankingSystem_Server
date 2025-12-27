@@ -9,6 +9,7 @@ const errorHandler = require('../../../middlewares/errorHandler.middleware');
 describe('Error Handler Middleware - Unit Tests', () => {
   let mockReq;
   let mockRes;
+  let mockNext;
   let consoleErrorSpy;
 
   beforeEach(() => {
@@ -18,6 +19,8 @@ describe('Error Handler Middleware - Unit Tests', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
     };
+
+    mockNext = jest.fn();
 
     // Spy on console.error to suppress output during tests
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -37,7 +40,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(err.stack);
       expect(mockRes.status).toHaveBeenCalledWith(400);
@@ -54,7 +57,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -70,7 +73,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'ValidationError: Validation failed\n    at Model.save',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(err.stack);
     });
@@ -84,7 +87,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -102,7 +105,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -118,7 +121,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'MongoError: E11000 duplicate key',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(err.stack);
     });
@@ -132,7 +135,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -148,7 +151,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -167,7 +170,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
 
       // Note: Current implementation treats TokenExpiredError as generic error
       // This test documents current behavior
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -185,7 +188,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(404);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -200,7 +203,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -215,7 +218,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -230,7 +233,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -246,7 +249,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error stack...',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(418);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -269,7 +272,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
 
       // Note: Current implementation doesn't have special handling for CastError
       // This test documents current behavior
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
     });
@@ -282,7 +285,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error: Test error\n    at Object.<anonymous>',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith(err.stack);
@@ -295,7 +298,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'ValidationError: Validation failed',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(err.stack);
     });
@@ -307,7 +310,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'MongoError: E11000',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(err.stack);
     });
@@ -324,7 +327,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
 
       errors.forEach((err) => {
         jest.clearAllMocks();
-        errorHandler(err, mockRes);
+        errorHandler(err, mockReq, mockRes, mockNext);
 
         const responseCall = mockRes.json.mock.calls[0][0];
         expect(responseCall).toHaveProperty('success', false);
@@ -341,7 +344,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
 
       errors.forEach((err) => {
         jest.clearAllMocks();
-        errorHandler(err, mockRes);
+        errorHandler(err, mockReq, mockRes, mockNext);
 
         const responseCall = mockRes.json.mock.calls[0][0];
         expect(responseCall).toHaveProperty('message');
@@ -355,7 +358,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'Error: Error message\n    at dangerous code location',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       const responseCall = mockRes.json.mock.calls[0][0];
       expect(responseCall).not.toHaveProperty('stack');
@@ -369,26 +372,39 @@ describe('Error Handler Middleware - Unit Tests', () => {
         message: 'Error without stack',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(undefined);
+      // When stack is not available, it should log the message
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error without stack');
       expect(mockRes.status).toHaveBeenCalledWith(500);
     });
 
     test('should handle null error', () => {
       const err = null;
 
-      // Error handler expects valid error objects, null will cause issues
-      // This test documents that null errors should not be passed to the handler
-      expect(() => errorHandler(err, mockRes)).toThrow();
+      // Error handler should handle null errors gracefully
+      errorHandler(err, mockReq, mockRes, mockNext);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Unknown error');
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Unknown error',
+      });
     });
 
     test('should handle undefined error', () => {
       const err = undefined;
 
-      // Error handler expects valid error objects, undefined will cause issues
-      // This test documents that undefined errors should not be passed to the handler
-      expect(() => errorHandler(err, mockRes)).toThrow();
+      // Error handler should handle undefined errors gracefully
+      errorHandler(err, mockReq, mockRes, mockNext);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Unknown error');
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Unknown error',
+      });
     });
 
     test('should handle error with status 0', () => {
@@ -398,7 +414,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'stack',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
     });
@@ -410,10 +426,10 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'stack',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
-      // When status is not a number, it uses err.status || 500, which evaluates to 'not a number'
-      expect(mockRes.status).toHaveBeenCalledWith('not a number');
+      // When status is not a valid number, it should default to 500
+      expect(mockRes.status).toHaveBeenCalledWith(500);
     });
 
     test('should handle error with multiple properties', () => {
@@ -426,7 +442,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
       };
 
       // ValidationError should take precedence
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -445,7 +461,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'stack',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
@@ -461,7 +477,7 @@ describe('Error Handler Middleware - Unit Tests', () => {
         stack: 'stack',
       };
 
-      errorHandler(err, mockRes);
+      errorHandler(err, mockReq, mockRes, mockNext);
 
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
