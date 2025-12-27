@@ -399,6 +399,27 @@ Delete a specific user.
 
 ---
 
+### Delete All Users (Admin Only)
+
+Delete all users in the system (dangerous operation).
+
+**Endpoint:** `DELETE /api/v1/users`
+
+**Authentication:** Required (JWT) + Admin Role
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "All users deleted successfully",
+  "data": {
+    "deletedCount": 150
+  }
+}
+```
+
+**Warning:** This operation cannot be undone. Use with extreme caution.
+
 ## Transaction Management
 
 Base path: `/api/v1/transactions`

@@ -102,9 +102,24 @@ router.get(
  * POST /api/public/cards/verify
  * Verify a card without charging
  * Required permission: charge (same as charging)
+ * Strict rate limiting to prevent CVV brute force attacks
  */
+const cardVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many card verification attempts, please try again after 15 minutes",
+    });
+  },
+});
+
 router.post(
   "/cards/verify",
+  cardVerifyLimiter,
   requirePermission("charge"),
   publicTransactionController.verifyCard
 );

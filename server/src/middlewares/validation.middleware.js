@@ -42,11 +42,14 @@ const validateUser = (req, res, next) => {
 };
 
 // Validation for registration (includes password)
+// Supports both personal and business account types
 const validateRegistration = (req, res, next) => {
   const {
     fullName = {},
     email,
     password,
+    accountType = "personal", // Default to personal for backward compatibility
+    businessInfo = {},
   } = req.body;
 
   const { firstName, lastName, middleInitial } = fullName;
@@ -59,11 +62,19 @@ const validateRegistration = (req, res, next) => {
     });
   }
 
-  // Password strength
-  if (password.length < 6) {
+  // Validate accountType
+  if (accountType && !["personal", "business"].includes(accountType)) {
     return res.status(400).json({
       success: false,
-      message: "Password must be at least 6 characters long",
+      message: "Account type must be either 'personal' or 'business'",
+    });
+  }
+
+  // Password strength
+  if (password.length < 10) {
+    return res.status(400).json({
+      success: false,
+      message: "Password must be at least 10 characters long",
     });
   }
 
@@ -89,6 +100,84 @@ const validateRegistration = (req, res, next) => {
       success: false,
       message: "Only smu.edu.ph email addresses are allowed",
     });
+  }
+
+  // Business account validation
+  if (accountType === "business") {
+    const { businessName, businessType, businessAddress, businessPhone, websiteUrl } = businessInfo;
+
+    // Required business fields
+    if (!businessName) {
+      return res.status(400).json({
+        success: false,
+        message: "Business name is required for business accounts",
+      });
+    }
+
+    if (businessName.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Business name must not exceed 100 characters",
+      });
+    }
+
+    if (!businessType) {
+      return res.status(400).json({
+        success: false,
+        message: "Business type is required for business accounts",
+      });
+    }
+
+    const validBusinessTypes = ["food", "retail", "services", "transport", "utilities", "other"];
+    if (!validBusinessTypes.includes(businessType)) {
+      return res.status(400).json({
+        success: false,
+        message: `Business type must be one of: ${validBusinessTypes.join(", ")}`,
+      });
+    }
+
+    // Website URL is required for business accounts (used for CORS whitelisting)
+    if (!websiteUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Website URL is required for business accounts. This will be used for CORS whitelisting.",
+      });
+    }
+
+    // Validate websiteUrl format
+    const urlPattern = /^https?:\/\/[\w.-]+(:\d+)?(\/.*)?$/;
+    if (!urlPattern.test(websiteUrl)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid website URL format. Must start with http:// or https://",
+      });
+    }
+
+    // Phone validation (optional but must be valid if provided)
+    if (businessPhone) {
+      const phoneRegex = /^(\+63|0)?[0-9]{10}$/;
+      if (!phoneRegex.test(businessPhone)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid phone number format",
+        });
+      }
+    }
+
+    // Business address validation (optional but has max length)
+    if (businessAddress && businessAddress.length > 200) {
+      return res.status(400).json({
+        success: false,
+        message: "Business address must not exceed 200 characters",
+      });
+    }
+  } else if (accountType === "personal") {
+    // Personal accounts should not provide businessInfo (data pollution prevention)
+    // We'll ignore it if provided, but warn in development
+    if (businessInfo && (businessInfo.businessName || businessInfo.businessType || businessInfo.websiteUrl)) {
+      // In production, we silently ignore. In development, we could log a warning.
+      // For now, we'll just ignore it - the model will clean it up
+    }
   }
 
   next();
@@ -337,18 +426,18 @@ const validateRefund = (req, res, next) => {
 
 /**
  * Validate business registration
+ * This endpoint is specifically for business registration, so always validate business fields
  */
 const validateBusinessRegistration = (req, res, next) => {
   const {
     fullName = {},
     email,
     password,
-    accountType,
     businessInfo = {},
   } = req.body;
 
   const { firstName, lastName, middleInitial } = fullName;
-  const { businessName, businessType, businessAddress, businessPhone } = businessInfo;
+  const { businessName, businessType, businessAddress, businessPhone, websiteUrl } = businessInfo;
 
   // Required user fields
   if (!firstName || !lastName || !email || !password) {
@@ -359,10 +448,10 @@ const validateBusinessRegistration = (req, res, next) => {
   }
 
   // Password strength
-  if (password.length < 6) {
+  if (password.length < 10) {
     return res.status(400).json({
       success: false,
-      message: "Password must be at least 6 characters long",
+      message: "Password must be at least 10 characters long",
     });
   }
 
@@ -390,47 +479,70 @@ const validateBusinessRegistration = (req, res, next) => {
     });
   }
 
-  // Business-specific validation
-  if (accountType === "business") {
-    if (!businessName) {
+  // Business-specific validation (always required for business registration endpoint)
+  if (!businessName) {
+    return res.status(400).json({
+      success: false,
+      message: "Business name is required for business accounts",
+    });
+  }
+
+  if (businessName.length > 100) {
+    return res.status(400).json({
+      success: false,
+      message: "Business name must not exceed 100 characters",
+    });
+  }
+
+  if (!businessType) {
+    return res.status(400).json({
+      success: false,
+      message: "Business type is required for business accounts",
+    });
+  }
+
+  const validBusinessTypes = ["food", "retail", "services", "transport", "utilities", "other"];
+  if (!validBusinessTypes.includes(businessType)) {
+    return res.status(400).json({
+      success: false,
+      message: `Business type must be one of: ${validBusinessTypes.join(", ")}`,
+    });
+  }
+
+  // Website URL is required for business registration (used for CORS whitelisting)
+  if (!websiteUrl) {
+    return res.status(400).json({
+      success: false,
+      message: "Website URL is required for business accounts. This will be used for CORS whitelisting.",
+    });
+  }
+
+  // Validate websiteUrl format
+  const urlPattern = /^https?:\/\/[\w.-]+(:\d+)?(\/.*)?$/;
+  if (!urlPattern.test(websiteUrl)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid website URL format. Must start with http:// or https://",
+    });
+  }
+
+  // Phone validation (optional but must be valid if provided)
+  if (businessPhone) {
+    const phoneRegex = /^(\+63|0)?[0-9]{10}$/;
+    if (!phoneRegex.test(businessPhone)) {
       return res.status(400).json({
         success: false,
-        message: "Business name is required for business accounts",
+        message: "Invalid phone number format",
       });
     }
+  }
 
-    if (businessName.length > 100) {
-      return res.status(400).json({
-        success: false,
-        message: "Business name must not exceed 100 characters",
-      });
-    }
-
-    if (!businessType) {
-      return res.status(400).json({
-        success: false,
-        message: "Business type is required for business accounts",
-      });
-    }
-
-    const validBusinessTypes = ["food", "retail", "services", "transport", "utilities", "other"];
-    if (!validBusinessTypes.includes(businessType)) {
-      return res.status(400).json({
-        success: false,
-        message: `Business type must be one of: ${validBusinessTypes.join(", ")}`,
-      });
-    }
-
-    // Phone validation (optional but must be valid if provided)
-    if (businessPhone) {
-      const phoneRegex = /^(\+63|0)?[0-9]{10}$/;
-      if (!phoneRegex.test(businessPhone)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid phone number format",
-        });
-      }
-    }
+  // Business address validation (optional but has max length)
+  if (businessAddress && businessAddress.length > 200) {
+    return res.status(400).json({
+      success: false,
+      message: "Business address must not exceed 200 characters",
+    });
   }
 
   next();

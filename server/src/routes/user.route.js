@@ -1,18 +1,19 @@
 const express = require("express");
 const router = express.Router();
+const rateLimit = require("express-rate-limit");
 const userController = require("../controllers/user.controller");
 
-const { auth, checkRole, validateUser, validateRegistration } = require("../middlewares");
+const { auth, checkRole, validateUser, validateRegistration, loginLimiter } = require("../middlewares");
 
 // ============================================
 // PUBLIC ROUTES (No authentication required)
 // ============================================
-
+        
 // Register new user
 router.post("/register", validateRegistration, userController.register);
 
-// Login user
-router.post("/login", userController.login);
+// Login user (with strict rate limiting to prevent brute force)
+router.post("/login", loginLimiter, userController.login);
 
 // ============================================
 // PROTECTED ROUTES (Authentication required)
@@ -27,8 +28,8 @@ router.get("/", auth, checkRole("admin"), userController.getAllUsers);
 // Get user by ID (admin only)
 router.get("/:id", auth, checkRole("admin"), userController.getUserById);
 
-// Create user (admin only) - with validation
-router.post("/", auth, checkRole("admin"), validateUser, userController.createUser);
+// Create user (admin only) - with comprehensive validation
+router.post("/", auth, checkRole("admin"), validateRegistration, userController.createUser);
 
 // Update user (admin only) - with validation
 router.put("/:id", auth, checkRole("admin"), validateUser, userController.updateUser);

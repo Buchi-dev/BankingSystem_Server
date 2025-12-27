@@ -65,7 +65,9 @@ The system uses MongoDB with Mongoose ODM for data modeling. All models use stri
     lastUsed: Date,
     dailyLimit: Number,
     dailySpent: Number,
-    lastResetDate: Date
+    lastResetDate: Date,
+    cvvAttempts: Number,
+    lockoutUntil: Date
   },
   wallet: {
     balance: Decimal128,
@@ -244,6 +246,17 @@ Automatically generated virtual card for payments.
   - Last daily limit reset timestamp
   - Used to determine if new day
 
+- **cvvAttempts** (Number)
+  - Number of failed CVV attempts
+  - Default: `0`
+  - Resets on successful transaction
+  - Used for card lockout mechanism
+
+- **lockoutUntil** (Date)
+  - Timestamp until card is locked due to failed attempts
+  - Default: `null`
+  - Card locked when set to future date
+
 #### wallet (Object, Required)
 User's digital wallet for balance management.
 
@@ -321,6 +334,7 @@ if (this.isNew) {
   from: ObjectId,
   to: ObjectId,
   type: String,
+  category: String,
   amount: Number,
   paymentMethod: String,
   cardUsed: {
@@ -336,8 +350,8 @@ if (this.isNew) {
   description: String,
   status: String,
   originalTransaction: ObjectId,
-  balanceBefore: Decimal128,
-  balanceAfter: Decimal128,
+  balanceBefore: Number,
+  balanceAfter: Number,
   reference: String,
   createdAt: Date,
   updatedAt: Date
@@ -376,6 +390,16 @@ Transaction type/category.
 - `transfer` - User to user (internal)
 - `payment` - Customer to business (via API)
 - `refund` - Reverse of payment
+
+#### category (String, Auto-generated)
+Transaction category for analytics.
+
+**Values:**
+- `B2B` - Business to Business
+- `B2C` - Business to Consumer
+- `C2C` - Consumer to Consumer
+
+**Auto-determination:** Based on sender and receiver account types
 
 #### amount (Number, Required)
 Transaction amount in PHP.
@@ -454,12 +478,12 @@ Reference to original transaction (for refunds).
 **References:** `transactions` collection
 **Used only when:** `type === "refund"`
 
-#### balanceBefore (Decimal128)
+#### balanceBefore (Number)
 User's balance before transaction.
 
 **Purpose:** Audit trail and dispute resolution
 
-#### balanceAfter (Decimal128)
+#### balanceAfter (Number)
 User's balance after transaction.
 
 **Purpose:** Audit trail and verification
@@ -528,7 +552,6 @@ None (static model, operations in controller)
     lastTransactionReset: Date
   },
   allowedOrigins: [String],
-  allowedIPs: [String],
   isActive: Boolean,
   expiresAt: Date,
   createdAt: Date,
@@ -641,13 +664,6 @@ CORS whitelist for browser-based requests.
 **Example:** `["https://example.com", "https://app.example.com"]`
 **Validation:** Valid HTTP/HTTPS URLs
 **Empty array:** No CORS restrictions
-
-#### allowedIPs (Array<String>)
-IP whitelist for API key usage.
-
-**Format:** Array of IP addresses
-**Example:** `["203.0.113.1", "192.168.1.100"]`
-**Empty array:** No IP restrictions
 
 #### isActive (Boolean)
 API key active status.

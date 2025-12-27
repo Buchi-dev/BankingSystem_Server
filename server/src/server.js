@@ -10,6 +10,12 @@
 // Load environment variables
 require('dotenv').config();
 
+// Validate critical environment variables on startup
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error("❌ JWT_SECRET must be at least 32 characters");
+  process.exit(1);
+}
+
 const app = require("./app");
 const connectDB = require("./configs/mongo.config");
 const Bank = require("./models/bank.model");
@@ -33,6 +39,8 @@ const initializeBank = async () => {
   }
 };
 
+let server;
+
 connectDB()
   .then(async () => {
     // Initialize bank on startup
@@ -41,7 +49,7 @@ connectDB()
     // Seed default staff and admin users
     await seedDefaultUsers();
 
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
   })
@@ -49,3 +57,29 @@ connectDB()
     console.error("Failed to connect to MongoDB:", err);
     process.exit(1);
   });
+
+// Graceful shutdown handlers
+const gracefulShutdown = async (signal) => {
+  console.log(`\n${signal} received. Starting graceful shutdown...`);
+  
+  // Stop accepting new requests
+  if (server) {
+    server.close(() => {
+      console.log("HTTP server closed");
+    });
+  }
+
+  // Close database connection
+  try {
+    const mongoose = require("mongoose");
+    await mongoose.connection.close();
+    console.log("MongoDB connection closed");
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during shutdown:", error);
+    process.exit(1);
+  }
+};
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));

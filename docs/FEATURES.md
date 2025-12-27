@@ -121,6 +121,16 @@ Comprehensive transaction system with multiple types:
 4. **Payment**: Customer → Business (via API)
 5. **Refund**: Business → Customer (reversal)
 
+#### Transaction Categories
+
+Automatic categorization for analytics:
+
+- **B2B** (Business to Business): Business account to business account
+- **B2C** (Business to Consumer): Business account to personal account
+- **C2C** (Consumer to Consumer): Personal account to personal account
+
+**Auto-determination:** Based on sender and receiver account types in pre-save hook
+
 #### Transaction Features
 - Unique reference IDs for tracking
 - Status tracking (pending, completed, failed, refunded)
@@ -469,6 +479,27 @@ UserSchema.methods.canSpend = function(amount) {
 5. **Usage Tracking**: Last used timestamp
 6. **Daily Limits**: Configurable spending limits
 7. **Active Status**: Can be deactivated
+8. **CVV Lockout**: Failed CVV attempts tracking and temporary lockout
+
+### CVV Lockout Mechanism
+
+**Implementation:**
+- Tracks failed CVV attempts per card
+- Locks card for 15 minutes after 5 failed attempts
+- Resets counter on successful transaction
+- Prevents brute force attacks on CVV
+
+**Fields:**
+- `cvvAttempts`: Number of consecutive failed attempts
+- `lockoutUntil`: Timestamp when lockout expires
+
+**Logic:**
+```javascript
+if (card.cvvAttempts >= 5) {
+  const lockoutTime = 15 * 60 * 1000; // 15 minutes
+  card.lockoutUntil = new Date(Date.now() + lockoutTime);
+}
+```
 
 ---
 
@@ -502,6 +533,7 @@ UserSchema.methods.canSpend = function(amount) {
 - CORS origin whitelisting
 - Usage tracking
 - Active/inactive status
+- Live/test mode support
 
 **Permissions System:**
 - `charge`: Process payments
@@ -517,7 +549,8 @@ UserSchema.methods.canSpend = function(amount) {
 allowedOrigins: [
   "https://example.com",
   "https://www.example.com",
-  "https://app.example.com"
+  "https://app.example.com",
+  "https://*.example.com"  // Wildcard support
 ]
 
 // Middleware validates origin
@@ -600,6 +633,26 @@ try {
 5. Reverse transaction creation
 6. Balance restoration
 7. Status update (original → refunded)
+
+### Transaction Pre-save Hooks
+
+**Category Auto-determination:**
+```javascript
+TransactionSchema.pre('save', async function() {
+  if (this.isNew) {
+    const sender = await User.findById(this.from);
+    const receiver = await User.findById(this.to);
+    
+    if (sender.accountType === 'business' && receiver.accountType === 'business') {
+      this.category = 'B2B';
+    } else if (sender.accountType === 'business' || receiver.accountType === 'business') {
+      this.category = 'B2C';
+    } else {
+      this.category = 'C2C';
+    }
+  }
+});
+```
 
 ---
 

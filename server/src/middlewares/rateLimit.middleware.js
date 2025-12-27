@@ -27,7 +27,21 @@ const speedLimiter = slowDown({
   delayMs: () => 500 // Always add 500ms delay per request above threshold (new v2 behavior)
 });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many login attempts, please try again after 15 minutes",
+    });
+  },
+});
+
 module.exports = {
   limiter,
   speedLimiter,
+  loginLimiter
 };

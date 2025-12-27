@@ -88,9 +88,42 @@ const chargeCard = async (req, res, next) => {
       });
     }
 
+    // Check if card is locked due to failed attempts
+    if (customer.virtualCard.lockedUntil && new Date() < customer.virtualCard.lockedUntil) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(423).json({
+        success: false,
+        error: {
+          code: "CARD_LOCKED",
+          message: "Card is temporarily locked due to multiple failed CVV attempts. Please try again later.",
+        },
+      });
+    }
+
     // Verify CVV
     const cvvValid = await customer.compareCVV(cvv);
     if (!cvvValid) {
+      // Increment failed attempts
+      customer.virtualCard.failedCVVAttempts = (customer.virtualCard.failedCVVAttempts || 0) + 1;
+      customer.virtualCard.lastFailedCVVAttempt = new Date();
+
+      // Lock card after 5 failed attempts for 30 minutes
+      if (customer.virtualCard.failedCVVAttempts >= 5) {
+        customer.virtualCard.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+        await customer.save({ session });
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(423).json({
+          success: false,
+          error: {
+            code: "CARD_LOCKED",
+            message: "Card has been locked due to multiple failed CVV attempts. Please try again in 30 minutes.",
+          },
+        });
+      }
+
+      await customer.save({ session });
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({
@@ -100,6 +133,12 @@ const chargeCard = async (req, res, next) => {
           message: "Invalid CVV.",
         },
       });
+    }
+
+    // Reset failed attempts on successful CVV verification
+    if (customer.virtualCard.failedCVVAttempts > 0) {
+      customer.virtualCard.failedCVVAttempts = 0;
+      customer.virtualCard.lockedUntil = null;
     }
 
     // Check daily spending limit
@@ -164,11 +203,13 @@ const chargeCard = async (req, res, next) => {
     await apiKey.save({ session });
 
     // Create transaction record
+    // B2C transaction: Personal account (customer) to Business account
     const transaction = new Transaction({
       type: "payment",
       from: customer._id,
       to: business._id,
       amount,
+      transactionCategory: "B2C", // Explicitly set as Business-to-Consumer
       paymentMethod: "card",
       cardUsed: {
         last4: cardNumber.slice(-4),
@@ -334,11 +375,13 @@ const refundTransaction = async (req, res, next) => {
     await originalTransaction.save({ session });
 
     // Create refund transaction record
+    // B2C refund: Business account to Personal account (reversal of B2C payment)
     const refundTransaction = new Transaction({
       type: "refund",
       from: business._id, // Refund comes from business
       to: customer._id,   // Goes to customer
       amount: amountToRefund,
+      transactionCategory: "B2C", // Explicitly set as Business-to-Consumer (refund)
       paymentMethod: "api",
       merchant: {
         businessId: business._id,
@@ -571,9 +614,38 @@ const verifyCard = async (req, res, next) => {
       });
     }
 
+    // Check if card is locked due to failed attempts
+    if (customer.virtualCard.lockedUntil && new Date() < customer.virtualCard.lockedUntil) {
+      return res.status(423).json({
+        success: false,
+        error: {
+          code: "CARD_LOCKED",
+          message: "Card is temporarily locked due to multiple failed CVV attempts. Please try again later.",
+        },
+      });
+    }
+
     // Verify CVV
     const cvvValid = await customer.compareCVV(cvv);
     if (!cvvValid) {
+      // Increment failed attempts
+      customer.virtualCard.failedCVVAttempts = (customer.virtualCard.failedCVVAttempts || 0) + 1;
+      customer.virtualCard.lastFailedCVVAttempt = new Date();
+
+      // Lock card after 5 failed attempts for 30 minutes
+      if (customer.virtualCard.failedCVVAttempts >= 5) {
+        customer.virtualCard.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+        await customer.save();
+        return res.status(423).json({
+          success: false,
+          error: {
+            code: "CARD_LOCKED",
+            message: "Card has been locked due to multiple failed CVV attempts. Please try again in 30 minutes.",
+          },
+        });
+      }
+
+      await customer.save();
       return res.status(400).json({
         success: false,
         error: {
@@ -581,6 +653,13 @@ const verifyCard = async (req, res, next) => {
           message: "Invalid CVV.",
         },
       });
+    }
+
+    // Reset failed attempts on successful CVV verification
+    if (customer.virtualCard.failedCVVAttempts > 0) {
+      customer.virtualCard.failedCVVAttempts = 0;
+      customer.virtualCard.lockedUntil = null;
+      await customer.save();
     }
 
     // Check card status

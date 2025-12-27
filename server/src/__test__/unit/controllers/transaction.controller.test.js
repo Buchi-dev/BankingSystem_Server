@@ -25,7 +25,7 @@ const originalStartSession = mongoose.startSession;
 mongoose.startSession = jest.fn(() => Promise.resolve(mockSession));
 
 const originalDecimal128 = mongoose.Types.Decimal128;
-mongoose.Types.Decimal128.fromString = jest.fn((val) => ({ toString: () => val }));
+mongoose.Types.Decimal128.fromString = jest.fn((val) => val);
 
 const { transferFunds, getUserTransactions } = require('../../../controllers/transaction.controller');
 const User = require('../../../models/user.model');
@@ -53,24 +53,53 @@ describe('Transaction Controller - Unit Tests', () => {
             jest.clearAllMocks();
         });
 
-        test('should transfer funds successfully', async () => {
-            const fromUser = {
-                _id: 'user1_id',
-                wallet: { balance: { toString: () => '500' } },
-                save: jest.fn(),
-            };
-            const toUser = {
-                _id: 'user2_id',
-                wallet: { balance: { toString: () => '200' } },
-                save: jest.fn(),
-            };
+        let fromBalanceValue;
+let toBalanceValue;
+
+// Mutating mocks share variables for all tests.
+const fromUser = {
+    _id: 'user1_id',
+    wallet: {
+        get balance() { return { toString: () => fromBalanceValue }; },
+        set balance(val) { fromBalanceValue = (val && typeof val.toString === 'function') ? val.toString() : String(val); }
+    },
+    save: jest.fn()
+};
+const toUser = {
+    _id: 'user2_id',
+    wallet: {
+        get balance() { return { toString: () => toBalanceValue }; },
+        set balance(val) { toBalanceValue = (val && typeof val.toString === 'function') ? val.toString() : String(val); }
+    },
+    save: jest.fn()
+};
+
+test('should transfer funds successfully', async () => {
+            fromBalanceValue = '500';
+            toBalanceValue = '200';
+    _id: 'user1_id',
+    wallet: {
+        get balance() { return { toString: () => fromBalanceValue }; },
+        set balance(val) { fromBalanceValue = (val && typeof val.toString === 'function') ? val.toString() : String(val); }
+    },
+    save: jest.fn(),
+};
+const toUser = {
+    _id: 'user2_id',
+    wallet: {
+        get balance() { return { toString: () => toBalanceValue }; },
+        set balance(val) { toBalanceValue = val.toString(); }
+    },
+    save: jest.fn(),
+};
 
             User.findById.mockImplementation((id) => {
                 return {
-                    session: jest.fn().mockResolvedValue(
-                        id === 'user1_id' ? fromUser : 
-                        id === 'user2_id' ? toUser : null
-                    ),
+                    session: jest.fn().mockImplementation(async (sessionArg) => {
+                        if (id === 'user1_id') return fromUser;
+                        if (id === 'user2_id') return toUser;
+                        return null;
+                    })
                 };
             });
 
@@ -138,16 +167,24 @@ describe('Transaction Controller - Unit Tests', () => {
         });
 
         test('should return 400 if insufficient funds', async () => {
-            const fromUser = {
-                _id: 'user1_id',
-                wallet: { balance: { toString: () => '50' } },
-                save: jest.fn(),
-            };
-            const toUser = {
-                _id: 'user2_id',
-                wallet: { balance: { toString: () => '200' } },
-                save: jest.fn(),
-            };
+            fromBalanceValue = '50';
+toBalanceValue = '200';
+const fromUser = {
+    _id: 'user1_id',
+    wallet: {
+        get balance() { return { toString: () => fromBalanceValue }; },
+        set balance(val) { fromBalanceValue = (val && typeof val.toString === 'function') ? val.toString() : String(val); }
+    },
+    save: jest.fn(),
+};
+const toUser = {
+    _id: 'user2_id',
+    wallet: {
+        get balance() { return { toString: () => toBalanceValue }; },
+        set balance(val) { toBalanceValue = val.toString(); }
+    },
+    save: jest.fn(),
+};
 
             User.findById.mockImplementation((id) => ({
                 session: jest.fn().mockResolvedValue(
@@ -169,16 +206,24 @@ describe('Transaction Controller - Unit Tests', () => {
         test('should handle exact balance transfer', async () => {
             req.body.amount = 500;
 
-            const fromUser = {
-                _id: 'user1_id',
-                wallet: { balance: { toString: () => '500' } },
-                save: jest.fn(),
-            };
-            const toUser = {
-                _id: 'user2_id',
-                wallet: { balance: { toString: () => '200' } },
-                save: jest.fn(),
-            };
+            fromBalanceValue = '500';
+toBalanceValue = '200';
+const fromUser = {
+    _id: 'user1_id',
+    wallet: {
+        get balance() { return { toString: () => fromBalanceValue }; },
+        set balance(val) { fromBalanceValue = (val && typeof val.toString === 'function') ? val.toString() : String(val); }
+    },
+    save: jest.fn(),
+};
+const toUser = {
+    _id: 'user2_id',
+    wallet: {
+        get balance() { return { toString: () => toBalanceValue }; },
+        set balance(val) { toBalanceValue = val.toString(); }
+    },
+    save: jest.fn(),
+};
 
             User.findById.mockImplementation((id) => ({
                 session: jest.fn().mockResolvedValue(
@@ -212,16 +257,24 @@ describe('Transaction Controller - Unit Tests', () => {
         });
 
         test('should abort transaction on save error', async () => {
-            const fromUser = {
-                _id: 'user1_id',
-                wallet: { balance: { toString: () => '500' } },
-                save: jest.fn().mockRejectedValue(new Error('Save failed')),
-            };
-            const toUser = {
-                _id: 'user2_id',
-                wallet: { balance: { toString: () => '200' } },
-                save: jest.fn(),
-            };
+            fromBalanceValue = '500';
+toBalanceValue = '200';
+const fromUser = {
+    _id: 'user1_id',
+    wallet: {
+        get balance() { return { toString: () => fromBalanceValue }; },
+        set balance(val) { fromBalanceValue = (val && typeof val.toString === 'function') ? val.toString() : String(val); }
+    },
+    save: jest.fn().mockRejectedValue(new Error('Save failed')),
+};
+const toUser = {
+    _id: 'user2_id',
+    wallet: {
+        get balance() { return { toString: () => toBalanceValue }; },
+        set balance(val) { toBalanceValue = val.toString(); }
+    },
+    save: jest.fn(),
+};
 
             User.findById.mockImplementation((id) => ({
                 session: jest.fn().mockResolvedValue(
@@ -237,16 +290,24 @@ describe('Transaction Controller - Unit Tests', () => {
         });
 
         test('should create transaction with correct data', async () => {
-            const fromUser = {
-                _id: 'user1_id',
-                wallet: { balance: { toString: () => '500' } },
-                save: jest.fn(),
-            };
-            const toUser = {
-                _id: 'user2_id',
-                wallet: { balance: { toString: () => '200' } },
-                save: jest.fn(),
-            };
+            fromBalanceValue = '500';
+toBalanceValue = '200';
+const fromUser = {
+    _id: 'user1_id',
+    wallet: {
+        get balance() { return { toString: () => fromBalanceValue }; },
+        set balance(val) { fromBalanceValue = (val && typeof val.toString === 'function') ? val.toString() : String(val); }
+    },
+    save: jest.fn(),
+};
+const toUser = {
+    _id: 'user2_id',
+    wallet: {
+        get balance() { return { toString: () => toBalanceValue }; },
+        set balance(val) { toBalanceValue = val.toString(); }
+    },
+    save: jest.fn(),
+};
 
             User.findById.mockImplementation((id) => ({
                 session: jest.fn().mockResolvedValue(

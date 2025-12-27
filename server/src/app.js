@@ -41,8 +41,8 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Parse URL-enc
 app.use(sanitize); // SECURITY: Sanitize all inputs to prevent XSS attacks
 app.use(logger); // Log every request
 
-// 4. Rate Limiting & Speed Control
-app.use("/api/", limiter, speedLimiter);
+// 4. Rate Limiting & Speed Control (exclude health check)
+app.use("/api/v1", limiter, speedLimiter);
 
 // ============================================
 // 5. API VERSION 1 ROUTES

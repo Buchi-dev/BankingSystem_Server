@@ -7,6 +7,7 @@
  * - Business verification (admin only)
  */
 
+const mongoose = require("mongoose");
 const User = require("../models/user.model");
 const APIKey = require("../models/apiKey.model");
 const jwt = require("jsonwebtoken");
@@ -136,18 +137,25 @@ const generateAPIKey = async (req, res, next) => {
       });
     }
 
-    // Check existing API keys count (limit to 5 per business)
-    const existingKeysCount = await APIKey.countDocuments({
-      business: userId,
-      isActive: true,
-    });
+    // Use transaction to prevent race condition when checking API key limit
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    if (existingKeysCount >= 5) {
-      return res.status(400).json({
-        success: false,
-        message: "Maximum number of API keys (5) reached. Please revoke an existing key first.",
-      });
-    }
+    try {
+      // Check existing API keys count (limit to 5 per business) - atomic check
+      const existingKeysCount = await APIKey.countDocuments({
+        business: userId,
+        isActive: true,
+      }).session(session);
+
+      if (existingKeysCount >= 5) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "Maximum number of API keys (5) reached. Please revoke an existing key first.",
+        });
+      }
 
     // Validate key name
     if (!name || name.length < 3) {
@@ -210,14 +218,27 @@ const generateAPIKey = async (req, res, next) => {
       }
     }
 
-    // Create the API key with allowed origins
-    const { apiKey, plainKey } = await APIKey.createKey(
-      userId,
+    // Create the API key with allowed origins (within transaction)
+    const { generateAPIKey, hashAPIKey } = require("../utils/cardGenerator");
+    const prefix = environment === "test" ? "scb_test_" : "scb_live_";
+    const plainKey = generateAPIKey(prefix);
+    const keyHash = hashAPIKey(plainKey);
+    const keyPrefix = plainKey.substring(0, 12);
+
+    const apiKey = new APIKey({
+      business: userId,
+      keyHash,
+      keyPrefix,
       name,
-      permissions || ["charge", "transactions"],
-      originsToUse,
-      environment
-    );
+      permissions: permissions || ["charge", "transactions"],
+      allowedOrigins: originsToUse,
+      environment,
+    });
+
+    await apiKey.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).json({
       success: true,
@@ -233,6 +254,8 @@ const generateAPIKey = async (req, res, next) => {
       },
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };

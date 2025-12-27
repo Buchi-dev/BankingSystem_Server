@@ -6,7 +6,7 @@ const { formatCardNumber, maskCardNumber } = require("../utils/cardGenerator");
  * AUTHENTICATION CONTROLLERS
  */
 
-// Register new user
+// Register new user (supports both personal and business accounts)
 const register = async (req, res, next) => {
   try {
     // SECURITY: Only whitelist allowed fields - role is NOT accepted from user input
@@ -14,9 +14,19 @@ const register = async (req, res, next) => {
       fullName = {},
       email,
       password,
+      accountType = "personal", // Default to personal for backward compatibility
+      businessInfo = {},
     } = req.body;
 
     const { firstName, lastName, middleInitial } = fullName;
+
+    // Validate accountType
+    if (accountType && !["personal", "business"].includes(accountType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Account type must be either 'personal' or 'business'",
+      });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -27,25 +37,43 @@ const register = async (req, res, next) => {
       });
     }
 
-    // Create new user (password will be hashed automatically by model middleware)
-    // Virtual card is auto-generated for personal accounts
-    // SECURITY: Role is always 'user' for new registrations - admin roles must be assigned manually
-    const user = await User.create({
+    // Prepare user data based on account type
+    const userData = {
       fullName: { firstName, lastName, middleInitial },
       email,
       password,
       role: "user", // SECURITY: Hardcoded - prevents mass assignment attack
-      accountType: "personal", // Personal account gets virtual card
-    });
+      accountType: accountType || "personal",
+    };
+
+    // Only populate businessInfo for business accounts (data pollution prevention)
+    if (accountType === "business") {
+      const { businessName, businessType, businessAddress, businessPhone, websiteUrl } = businessInfo;
+      
+      userData.businessInfo = {
+        businessName,
+        businessType,
+        businessAddress,
+        businessPhone,
+        websiteUrl,
+        isVerified: false, // Requires admin verification
+      };
+    }
+    // For personal accounts, businessInfo should not be set (model will clean it up if accidentally provided)
+
+    // Create new user (password will be hashed automatically by model middleware)
+    // Virtual card is auto-generated for personal accounts only
+    // SECURITY: Role is always 'user' for new registrations - admin roles must be assigned manually
+    const user = await User.create(userData);
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
+      { id: user._id, email: user.email, role: user.role, accountType: user.accountType },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || "7d" }
     );
 
-    // Build response with virtual card info (shown only once at registration)
+    // Build response based on account type
     const responseData = {
       user: {
         id: user._id,
@@ -59,8 +87,8 @@ const register = async (req, res, next) => {
       token,
     };
 
-    // Include virtual card details (CVV and PIN shown only at registration!)
-    if (user.virtualCard?.cardNumber) {
+    // Include virtual card details for personal accounts (CVV and PIN shown only at registration!)
+    if (user.accountType === "personal" && user.virtualCard?.cardNumber) {
       responseData.virtualCard = {
         cardNumber: formatCardNumber(user.virtualCard.cardNumber),
         cvv: user._plainCVV, // Only shown once at registration
@@ -70,9 +98,24 @@ const register = async (req, res, next) => {
       };
     }
 
+    // Include business info for business accounts
+    if (user.accountType === "business" && user.businessInfo) {
+      responseData.user.businessInfo = {
+        businessName: user.businessInfo.businessName,
+        businessType: user.businessInfo.businessType,
+        websiteUrl: user.businessInfo.websiteUrl,
+        isVerified: user.businessInfo.isVerified,
+      };
+    }
+
+    // Set appropriate success message
+    const successMessage = user.accountType === "business"
+      ? "Business account registered successfully. Awaiting verification."
+      : "User registered successfully";
+
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: successMessage,
       data: responseData,
     });
   } catch (error) {
@@ -166,12 +209,42 @@ const getProfile = async (req, res, next) => {
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find();
-    if (!users)
-      return res
-        .status(404)
-        .json({ success: false, message: "Users Not Found" });
-    res.status(200).json({ success: true, count: users.length, data: users });
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Validate pagination parameters
+    if (page < 1 || limit < 1 || limit > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid pagination parameters. Page must be >= 1, limit must be between 1 and 100",
+      });
+    }
+
+    // Get total count for pagination metadata
+    const totalCount = await User.countDocuments();
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Fetch users with pagination
+    const users = await User.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      count: users.length,
+      data: users,
+    });
   } catch (error) {
     next(error);
   }
@@ -220,6 +293,14 @@ const deleteUser = async (req, res, next) => {
 };
 const deleteAllUsers = async (req, res, next) => {
   try {
+    // Require explicit confirmation to prevent accidental deletion
+    if (req.query.confirm !== 'true') {
+      return res.status(400).json({
+        success: false,
+        message: "This is a dangerous operation. Add ?confirm=true to the query string to proceed.",
+      });
+    }
+
     const result = await User.deleteMany({});
     res
       .status(200)

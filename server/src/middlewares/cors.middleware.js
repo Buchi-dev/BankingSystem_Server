@@ -104,7 +104,7 @@ const getAllowedOrigin = async (origin, path, apiKeyHeader) => {
     };
   } catch (error) {
     console.error("CORS Middleware Error:", error);
-    return { allowed: true, origin: null }; // Fail open, let apiAuth handle it
+    return { allowed: false, origin: null, error: "CORS_VALIDATION_ERROR" };
   }
 };
 

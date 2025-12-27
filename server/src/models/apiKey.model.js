@@ -232,9 +232,9 @@ APIKeySchema.methods.hasPermission = function (permission) {
 
 // Method to check rate limit
 APIKeySchema.methods.checkRateLimit = function () {
-  // Reset daily counter if new day
-  const today = new Date().toDateString();
-  const lastReset = new Date(this.usage.lastResetDate).toDateString();
+  // Reset daily counter if new day (using UTC to avoid timezone issues)
+  const today = new Date().toISOString().split('T')[0];
+  const lastReset = new Date(this.usage.lastResetDate).toISOString().split('T')[0];
 
   if (today !== lastReset) {
     this.usage.dailyRequests = 0;
@@ -254,9 +254,9 @@ APIKeySchema.methods.recordUsage = function () {
 
 // Method to check transaction limit
 APIKeySchema.methods.canProcessTransaction = function (amount) {
-  // Reset daily counter if new day
-  const today = new Date().toDateString();
-  const lastReset = new Date(this.usage.lastResetDate).toDateString();
+  // Reset daily counter if new day (using UTC to avoid timezone issues)
+  const today = new Date().toISOString().split('T')[0];
+  const lastReset = new Date(this.usage.lastResetDate).toISOString().split('T')[0];
 
   if (today !== lastReset) {
     this.transactionLimits.dailyTransactionTotal = 0;

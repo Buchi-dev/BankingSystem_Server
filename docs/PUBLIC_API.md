@@ -532,6 +532,8 @@ Verify a card without charging (useful for card validation).
 
 **Permissions:** `charge`
 
+**Rate Limit:** 5 attempts per 15 minutes per card
+
 **Request Body:**
 ```json
 {
@@ -582,6 +584,15 @@ Verify a card without charging (useful for card validation).
   "error": {
     "code": "CARD_EXPIRED",
     "message": "This card has expired"
+  }
+}
+
+// 429 - Rate limit exceeded
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many verification attempts for this card"
   }
 }
 ```

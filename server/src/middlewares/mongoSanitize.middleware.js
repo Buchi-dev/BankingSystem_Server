@@ -30,13 +30,16 @@ const sanitizeData = (data) => {
   return sanitized;
 };
 
-// Middleware to sanitize request body and params
+// Middleware to sanitize request body, params, and query string
 const mongoSanitize = (req, res, next) => {
   if (req.body) {
     req.body = sanitizeData(req.body);
   }
   if (req.params) {
     req.params = sanitizeData(req.params);
+  }
+  if (req.query) {
+    req.query = sanitizeData(req.query);
   }
   next();
 };

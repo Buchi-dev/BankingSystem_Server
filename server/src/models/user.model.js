@@ -53,16 +53,22 @@ const UserSchema = new mongoose.Schema(
       default: "personal",
     },
 
-    // Business information (required for business accounts)
+    // Business information (required for business accounts only)
     businessInfo: {
       businessName: {
         type: String,
         trim: true,
         maxlength: 100,
+        required: function() {
+          return this.accountType === "business";
+        },
       },
       businessType: {
         type: String,
         enum: ["food", "retail", "services", "transport", "utilities", "other"],
+        required: function() {
+          return this.accountType === "business";
+        },
       },
       businessAddress: {
         type: String,
@@ -74,13 +80,20 @@ const UserSchema = new mongoose.Schema(
         trim: true,
         match: /^(\+63|0)?[0-9]{10}$/,
       },
-      // Required: Frontend URL for CORS whitelisting
+      // Required: Frontend URL for CORS whitelisting (required for business accounts)
       websiteUrl: {
         type: String,
         trim: true,
         maxlength: 200,
+        required: function() {
+          return this.accountType === "business";
+        },
         validate: {
           validator: function(v) {
+            // For business accounts, websiteUrl is required
+            if (this.accountType === "business" && !v) {
+              return false;
+            }
             // Allow empty for existing records, but validate format if provided
             if (!v) return true;
             return /^https?:\/\/[\w.-]+(:\d+)?(\/.*)?$/.test(v);
@@ -119,12 +132,22 @@ const UserSchema = new mongoose.Schema(
       select: false,
     },
 
-    // Virtual Card Information
+    // Virtual Card Information (only for personal accounts)
     virtualCard: {
       cardNumber: {
         type: String,
         unique: true,
         sparse: true, // Allows null values while maintaining uniqueness
+        validate: {
+          validator: function(v) {
+            // Business accounts should not have virtual cards
+            if (this.accountType === "business" && v) {
+              return false;
+            }
+            return true;
+          },
+          message: "Business accounts cannot have virtual cards",
+        },
       },
       cvv: {
         type: String, // Hashed CVV
@@ -160,6 +183,17 @@ const UserSchema = new mongoose.Schema(
         type: Date,
         default: Date.now,
       },
+      // Failed CVV attempt tracking for lockout mechanism
+      failedCVVAttempts: {
+        type: Number,
+        default: 0,
+      },
+      lastFailedCVVAttempt: {
+        type: Date,
+      },
+      lockedUntil: {
+        type: Date,
+      },
     },
 
     wallet: {
@@ -183,6 +217,8 @@ const UserSchema = new mongoose.Schema(
 UserSchema.index({ "virtualCard.cardNumber": 1 });
 // Index for business account lookups
 UserSchema.index({ accountType: 1, "businessInfo.isVerified": 1 });
+// Index for email lookups (explicit index for clarity)
+UserSchema.index({ email: 1 });
 
 
 
@@ -199,6 +235,19 @@ UserSchema.pre("save", async function () {
     // Set wallet balance to 0 for non-user roles
     if (this.role !== "user") {
       this.wallet.balance = 0;
+    }
+
+    // Data pollution prevention: Clean up data based on account type
+    if (this.accountType === "personal") {
+      // Personal accounts should not have businessInfo
+      if (this.businessInfo && (this.businessInfo.businessName || this.businessInfo.businessType || this.businessInfo.websiteUrl)) {
+        this.businessInfo = undefined;
+      }
+    } else if (this.accountType === "business") {
+      // Business accounts should not have virtualCard
+      if (this.virtualCard && this.virtualCard.cardNumber) {
+        this.virtualCard = undefined;
+      }
     }
 
     // Generate virtual card for new users (personal accounts only)
@@ -258,9 +307,9 @@ UserSchema.methods.isCardValid = function () {
 
 // Method to check daily limit
 UserSchema.methods.canSpend = function (amount) {
-  // Reset daily spent if it's a new day
-  const today = new Date().toDateString();
-  const lastReset = new Date(this.virtualCard.lastResetDate).toDateString();
+  // Reset daily spent if it's a new day (using UTC to avoid timezone issues)
+  const today = new Date().toISOString().split('T')[0];
+  const lastReset = new Date(this.virtualCard.lastResetDate).toISOString().split('T')[0];
   
   if (today !== lastReset) {
     this.virtualCard.dailySpent = 0;
@@ -272,9 +321,9 @@ UserSchema.methods.canSpend = function (amount) {
 
 // Method to update daily spent
 UserSchema.methods.recordSpending = function (amount) {
-  // Reset if new day
-  const today = new Date().toDateString();
-  const lastReset = new Date(this.virtualCard.lastResetDate).toDateString();
+  // Reset if new day (using UTC to avoid timezone issues)
+  const today = new Date().toISOString().split('T')[0];
+  const lastReset = new Date(this.virtualCard.lastResetDate).toISOString().split('T')[0];
   
   if (today !== lastReset) {
     this.virtualCard.dailySpent = 0;

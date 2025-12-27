@@ -39,7 +39,11 @@ const connectDB = async () => {
     const mongoUri = process.env.MONGO_URI || 
                      process.env.MONGODB_URI || 
                      process.env.DATABASE_URL || '';
-    const conn = await mongoose.connect(mongoUri);
+    const conn = await mongoose.connect(mongoUri, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
     
     // Log successful connection with host information
     console.log(`MongoDB Connected: ${conn.connection.host}`);

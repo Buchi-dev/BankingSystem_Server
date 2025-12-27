@@ -8,25 +8,67 @@ const Bank = require("../models/bank.model");
  */
 
 // Get all transactions for a user
+// Optional query params: transactionCategory (B2B, B2C, C2C), type (deposit, withdraw, transfer, payment, refund)
 const getUserTransactions = async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const { transactionCategory, type, page, limit: limitParam } = req.query;
 
-    // Find all transactions where user is involved (as user, sender, or recipient)
-    const transactions = await Transaction.find({
+    // Pagination parameters
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limitParam) || 20;
+    const skip = (pageNum - 1) * limitNum;
+
+    // Validate pagination parameters
+    if (pageNum < 1 || limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid pagination parameters. Page must be >= 1, limit must be between 1 and 100",
+      });
+    }
+
+    // Build query for transactions where user is involved (as user, sender, or recipient)
+    const query = {
       $or: [
         { user: userId },
         { from: userId },
         { to: userId },
       ],
-    })
-      .populate("user", "fullName email")
-      .populate("from", "fullName email")
-      .populate("to", "fullName email")
-      .sort({ createdAt: -1 });
+    };
+
+    // Add optional filters
+    if (transactionCategory && ["B2B", "B2C", "C2C"].includes(transactionCategory)) {
+      query.transactionCategory = transactionCategory;
+    }
+
+    if (type && ["deposit", "withdraw", "transfer", "payment", "refund"].includes(type)) {
+      query.type = type;
+    }
+
+    // Get total count for pagination metadata
+    const totalCount = await Transaction.countDocuments(query);
+
+    // Find transactions matching the query with pagination
+    const transactions = await Transaction.find(query)
+      .populate("user", "fullName email accountType")
+      .populate("from", "fullName email accountType")
+      .populate("to", "fullName email accountType")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    const totalPages = Math.ceil(totalCount / limitNum);
 
     res.status(200).json({
       success: true,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        totalCount,
+        totalPages,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1,
+      },
       count: transactions.length,
       data: transactions,
     });
@@ -35,6 +77,8 @@ const getUserTransactions = async (req, res, next) => {
   }
 };
 // Transfer funds between users
+// Supports C2C (Consumer-to-Consumer) and B2B (Business-to-Business) transfers
+// Mixed transfers (Business-to-Personal or Personal-to-Business) must use payment API
 const transferFunds = async (req, res, next) => {
     const { to, amount } = req.body;
     const from = req.user.id; // Extract from JWT token
@@ -51,6 +95,39 @@ const transferFunds = async (req, res, next) => {
             return res.status(404).json({
                 success: false,
                 message: "Sender or recipient not found",
+            });
+        }
+
+        // Validate account types for transfer
+        const fromAccountType = fromUser.accountType;
+        const toAccountType = toUser.accountType;
+
+        // C2C Transfer: Both must be personal accounts
+        // B2B Transfer: Both must be business accounts
+        // Mixed transfers (B2C) are not allowed via transfer endpoint - must use payment API
+        if (fromAccountType !== toAccountType) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                message: `Cannot transfer between ${fromAccountType} and ${toAccountType} accounts using this endpoint. ` +
+                    `For Business-to-Consumer transactions, please use the payment API endpoint.`,
+            });
+        }
+
+        // Determine transaction category
+        let transactionCategory;
+        if (fromAccountType === "personal" && toAccountType === "personal") {
+            transactionCategory = "C2C";
+        } else if (fromAccountType === "business" && toAccountType === "business") {
+            transactionCategory = "B2B";
+        } else {
+            // This should not happen due to validation above, but handle it anyway
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                message: "Invalid account type combination for transfer",
             });
         }
 
@@ -78,6 +155,7 @@ const transferFunds = async (req, res, next) => {
             from,
             to,
             amount: transferAmount,
+            transactionCategory, // Explicitly set category
             fromBalanceBefore: fromBalance,
             fromBalanceAfter: fromBalance - transferAmount,
             toBalanceBefore: toBalance,
