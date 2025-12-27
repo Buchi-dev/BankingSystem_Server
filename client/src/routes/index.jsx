@@ -1,7 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { LoginForm } from '../components/forms/LoginForm'
-import { RegisterForm } from '../components/forms/RegisterForm'
-import { EmployeeLoginForm } from '../components/forms/EmployeeLoginForm';
+import { AuthModal } from '../components/modals/AuthModal';
 
 
 
@@ -12,9 +10,8 @@ export const Route = createFileRoute('/')({
 function Index() {
   return (
     <div>
-      <LoginForm />
-      <RegisterForm />
-      <EmployeeLoginForm />
+      <AuthModal open={true} onCancel={() => {}} />
+
     </div>
   );
 }

@@ -34,7 +34,7 @@ export function LoginForm() {
     <Form
       name="login"
       initialValues={{ remember: true }}
-      style={{ maxWidth: 360 }}
+      style={{ width: '100%' }}
       onFinish={onFinish}
     >
       <Form.Item

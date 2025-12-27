@@ -58,7 +58,7 @@ export function RegisterForm() {
       name="register"
       onFinish={onFinish}
       initialValues={{ accountType: 'personal', protocol: 'https' }}
-      style={{ maxWidth: 360 }}
+      style={{ width: '100%' }}
     >
       <Form.Item
         name="accountType"

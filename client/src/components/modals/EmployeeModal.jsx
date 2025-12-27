@@ -9,8 +9,8 @@ export function EmployeeModal({ open, onCancel }) {
 			onCancel={onCancel}
 			footer={null}
 			title="Employee Login"
-			destroyOnClose
-			bodyStyle={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '00px' }}
+			destroyOnHidden
+			styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '00px' } }}
 			style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
 		>
 			<EmployeeLoginForm />
