@@ -27,7 +27,7 @@ const registerBusiness = async (req, res, next) => {
     } = req.body;
 
     const { firstName, lastName, middleInitial } = fullName;
-    const { businessName, businessType, businessAddress, businessPhone, websiteUrl } = businessInfo;
+    const { businessName, businessType, websiteUrl } = businessInfo;
 
     // Validate websiteUrl is required for business registration
     if (!websiteUrl) {
@@ -65,8 +65,6 @@ const registerBusiness = async (req, res, next) => {
       businessInfo: {
         businessName,
         businessType,
-        businessAddress,
-        businessPhone,
         websiteUrl,
         isVerified: false, // Requires admin verification
       },
@@ -141,21 +139,20 @@ const generateAPIKey = async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    try {
-      // Check existing API keys count (limit to 5 per business) - atomic check
-      const existingKeysCount = await APIKey.countDocuments({
-        business: userId,
-        isActive: true,
-      }).session(session);
+    // Check existing API keys count (limit to 5 per business) - atomic check
+    const existingKeysCount = await APIKey.countDocuments({
+      business: userId,
+      isActive: true,
+    }).session(session);
 
-      if (existingKeysCount >= 5) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(400).json({
-          success: false,
-          message: "Maximum number of API keys (5) reached. Please revoke an existing key first.",
-        });
-      }
+    if (existingKeysCount >= 5) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({
+        success: false,
+        message: "Maximum number of API keys (5) reached. Please revoke an existing key first.",
+      });
+    }
 
     // Validate key name
     if (!name || name.length < 3) {

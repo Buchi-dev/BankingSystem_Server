@@ -9,7 +9,7 @@ const User = require("../models/user.model");
 const seedDefaultUsers = async () => {
   try {
     // Avoid polluting automated test runs
-    if (process.env.NODE_ENV === "test") {
+    if (process.env.NODE_ENV === "development") {
       return;
     }
 

@@ -779,8 +779,7 @@ if (apiKey.transactionLimits.dailyTransactionTotal + amount
 {
   businessName: "Required, max 100 chars",
   businessType: "Required, from enum list",
-  websiteUrl: "Optional, valid HTTP/HTTPS URL",
-  businessPhone: "Optional, Philippine format"
+  websiteUrl: "Required, valid HTTP/HTTPS URL"
 }
 ```
 

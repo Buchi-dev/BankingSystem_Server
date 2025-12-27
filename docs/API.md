@@ -683,8 +683,6 @@ Create a new business account with merchant capabilities.
   "businessInfo": {
     "businessName": "Pedro's Food Stall",
     "businessType": "food",
-    "businessAddress": "SMU Campus, Baguio City",
-    "businessPhone": "09171234567",
     "websiteUrl": "https://pedrosfood.com"
   }
 }
@@ -696,9 +694,7 @@ Create a new business account with merchant capabilities.
 - `password`: Required, minimum 6 characters
 - `businessName`: Required, max 100 characters
 - `businessType`: Required, one of: `food`, `retail`, `services`, `transport`, `utilities`, `other`
-- `businessAddress`: Optional, max 200 characters
-- `businessPhone`: Optional, valid Philippine phone format
-- `websiteUrl`: Optional, valid HTTP/HTTPS URL
+- `websiteUrl`: Required, valid HTTP/HTTPS URL
 
 **Success Response (201):**
 ```json
@@ -760,8 +756,6 @@ Retrieve business account information.
     "businessInfo": {
       "businessName": "Pedro's Food Stall",
       "businessType": "food",
-      "businessAddress": "SMU Campus, Baguio City",
-      "businessPhone": "09171234567",
       "websiteUrl": "https://pedrosfood.com",
       "isVerified": true,
       "verifiedAt": "2025-12-20T08:00:00.000Z"

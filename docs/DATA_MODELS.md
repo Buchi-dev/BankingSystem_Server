@@ -46,8 +46,6 @@ The system uses MongoDB with Mongoose ODM for data modeling. All models use stri
   businessInfo: {
     businessName: String,
     businessType: String,
-    businessAddress: String,
-    businessPhone: String,
     websiteUrl: String,
     isVerified: Boolean,
     verifiedAt: Date
@@ -134,16 +132,7 @@ Business account information. Required when `accountType === "business"`.
   - Category of business
   - Allowed values: `food`, `retail`, `services`, `transport`, `utilities`, `other`
   
-- **businessAddress** (String, optional)
-  - Physical business address
-  - Max length: 200 characters
-  
-- **businessPhone** (String, optional)
-  - Contact phone number
-  - Validation: Philippine phone format (`/^(\+63|0)?[0-9]{10}$/`)
-  - Example: `09171234567` or `+639171234567`
-  
-- **websiteUrl** (String, optional)
+- **websiteUrl** (String, required for business)
   - Business website URL for CORS whitelisting
   - Max length: 200 characters
   - Validation: Valid HTTP/HTTPS URL

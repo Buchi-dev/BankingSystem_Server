@@ -194,8 +194,6 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
           businessInfo: {
             businessName: `IntegrationTest Store ${timestamp}`,
             businessType: "retail",
-            businessAddress: "123 Test Street, Manila, Metro Manila, Philippines 1000",
-            businessPhone: "+639123456789",
             websiteUrl: "https://integrationtest.com",
           },
         });
@@ -720,8 +718,6 @@ describe("Public API Integration Tests - MongoDB Atlas", () => {
           businessInfo: {
             businessName: "<img src=x onerror=alert('XSS')>Store",
             businessType: "retail",
-            businessAddress: "123 Test Street",
-            businessPhone: "+639123456789",
             websiteUrl: "https://xsstest.com",
           },
         });

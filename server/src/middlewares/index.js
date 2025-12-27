@@ -1,7 +1,7 @@
 const auth = require('./auth.middleware');
 const errorHandler = require('./errorHandler.middleware');
 const logger = require('./loggers.middleware');
-const { limiter, speedLimiter, loginLimiter} = require('./rateLimit.middleware');
+const { limiter, speedLimiter, loginLimiter, cardVerifyLimiter} = require('./rateLimit.middleware');
 const checkRole = require('./role.middleware');
 const { 
   validateUser, 
@@ -26,6 +26,7 @@ module.exports = {
   limiter,
   speedLimiter,
   loginLimiter,
+  cardVerifyLimiter,
   checkRole,
   validateUser,
   validateRegistration,

@@ -104,7 +104,7 @@ const validateRegistration = (req, res, next) => {
 
   // Business account validation
   if (accountType === "business") {
-    const { businessName, businessType, businessAddress, businessPhone, websiteUrl } = businessInfo;
+    const { businessName, businessType, websiteUrl } = businessInfo;
 
     // Required business fields
     if (!businessName) {
@@ -150,25 +150,6 @@ const validateRegistration = (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: "Invalid website URL format. Must start with http:// or https://",
-      });
-    }
-
-    // Phone validation (optional but must be valid if provided)
-    if (businessPhone) {
-      const phoneRegex = /^(\+63|0)?[0-9]{10}$/;
-      if (!phoneRegex.test(businessPhone)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid phone number format",
-        });
-      }
-    }
-
-    // Business address validation (optional but has max length)
-    if (businessAddress && businessAddress.length > 200) {
-      return res.status(400).json({
-        success: false,
-        message: "Business address must not exceed 200 characters",
       });
     }
   } else if (accountType === "personal") {
@@ -437,7 +418,7 @@ const validateBusinessRegistration = (req, res, next) => {
   } = req.body;
 
   const { firstName, lastName, middleInitial } = fullName;
-  const { businessName, businessType, businessAddress, businessPhone, websiteUrl } = businessInfo;
+  const { businessName, businessType, websiteUrl } = businessInfo;
 
   // Required user fields
   if (!firstName || !lastName || !email || !password) {
@@ -523,25 +504,6 @@ const validateBusinessRegistration = (req, res, next) => {
     return res.status(400).json({
       success: false,
       message: "Invalid website URL format. Must start with http:// or https://",
-    });
-  }
-
-  // Phone validation (optional but must be valid if provided)
-  if (businessPhone) {
-    const phoneRegex = /^(\+63|0)?[0-9]{10}$/;
-    if (!phoneRegex.test(businessPhone)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid phone number format",
-      });
-    }
-  }
-
-  // Business address validation (optional but has max length)
-  if (businessAddress && businessAddress.length > 200) {
-    return res.status(400).json({
-      success: false,
-      message: "Business address must not exceed 200 characters",
     });
   }
 

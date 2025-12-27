@@ -8,6 +8,7 @@
 const express = require("express");
 const router = express.Router();
 
+
 const publicTransactionController = require("../controllers/public.transaction.controller");
 const {
   apiAuth,
@@ -15,6 +16,7 @@ const {
   checkTransactionLimit,
 } = require("../middlewares/apiAuth.middleware");
 const { validateCardCharge, validateRefund } = require("../middlewares/validation.middleware");
+const { cardVerifyLimiter } = require("../middlewares/rateLimit.middleware");
 
 // ============================================
 // ALL ROUTES REQUIRE API KEY AUTHENTICATION
@@ -104,18 +106,18 @@ router.get(
  * Required permission: charge (same as charging)
  * Strict rate limiting to prevent CVV brute force attacks
  */
-const cardVerifyLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    res.status(429).json({
-      success: false,
-      message: "Too many card verification attempts, please try again after 15 minutes",
-    });
-  },
-});
+// const cardVerifyLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 5, // 5 attempts per window
+//   standardHeaders: true,
+//   legacyHeaders: false,
+//   handler: (req, res) => {
+//     res.status(429).json({
+//       success: false,
+//       message: "Too many card verification attempts, please try again after 15 minutes",
+//     });
+//   },
+// });
 
 router.post(
   "/cards/verify",

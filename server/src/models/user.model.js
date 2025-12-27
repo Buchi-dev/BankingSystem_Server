@@ -70,16 +70,6 @@ const UserSchema = new mongoose.Schema(
           return this.accountType === "business";
         },
       },
-      businessAddress: {
-        type: String,
-        trim: true,
-        maxlength: 200,
-      },
-      businessPhone: {
-        type: String,
-        trim: true,
-        match: /^(\+63|0)?[0-9]{10}$/,
-      },
       // Required: Frontend URL for CORS whitelisting (required for business accounts)
       websiteUrl: {
         type: String,

@@ -1,16 +1,35 @@
 import React from 'react'
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Flex, Form, Input } from 'antd';
+import { Button, Checkbox, Flex, Form, Input, message } from 'antd';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 
-const onFinish = values => {
-  console.log('Success:', values);
-};
+import { userApi } from '../../api/user';
 
-const onFinishFailed = errorInfo => {
-  console.log('Failed:', errorInfo);
-};
 
 export function LoginForm() {
+  const navigate = useNavigate();
+
+  const loginMutation = useMutation({
+    mutationFn: userApi.login,
+    onSuccess: (data) => {
+      // Store token
+      localStorage.setItem('token', data.token);
+      // Store user info if needed
+      localStorage.setItem('user', JSON.stringify(data.user));
+      message.success('Login successful!');
+      // Navigate to dashboard or home
+      navigate({ to: '/dashboard' }); // Adjust the route as needed
+    },
+    onError: (error) => {
+      message.error(error.message || 'Login failed');
+    },
+  });
+
+  const onFinish = (values) => {
+    loginMutation.mutate(values);
+  };
+
   return (
     <Form
       name="login"
@@ -19,10 +38,10 @@ export function LoginForm() {
       onFinish={onFinish}
     >
       <Form.Item
-        name="username"
-        rules={[{ required: true, message: 'Please input your Username!' }]}
+        name="email"
+        rules={[{ required: true, message: 'Please input your Email!' }]}
       >
-        <Input prefix={<UserOutlined />} placeholder="Username" />
+        <Input prefix={<UserOutlined />} placeholder="Email" />
       </Form.Item>
       <Form.Item
         name="password"
@@ -40,7 +59,7 @@ export function LoginForm() {
       </Form.Item>
 
       <Form.Item>
-        <Button block type="primary" htmlType="submit">
+        <Button block type="primary" htmlType="submit" loading={loginMutation.isPending}>
           Log in
         </Button>
         or <a href="">Register now!</a>

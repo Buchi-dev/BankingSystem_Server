@@ -96,14 +96,6 @@ describe("Business Controller", () => {
         businessInfo: {
           businessName: "Test Store",
           businessType: "retail",
-          businessAddress: {
-            street: "123 Business St",
-            city: "Manila",
-            state: "Metro Manila",
-            country: "Philippines",
-            postalCode: "1000",
-          },
-          businessPhone: "+639123456789",
           websiteUrl: "https://teststore.com",
         },
       };

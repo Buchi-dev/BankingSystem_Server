@@ -48,13 +48,11 @@ const register = async (req, res, next) => {
 
     // Only populate businessInfo for business accounts (data pollution prevention)
     if (accountType === "business") {
-      const { businessName, businessType, businessAddress, businessPhone, websiteUrl } = businessInfo;
+      const { businessName, businessType, websiteUrl } = businessInfo;
       
       userData.businessInfo = {
         businessName,
         businessType,
-        businessAddress,
-        businessPhone,
         websiteUrl,
         isVerified: false, // Requires admin verification
       };
